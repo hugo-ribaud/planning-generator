@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+/* Custom theme */
+@theme {
+  --color-primary: #3B82F6;
+  --color-secondary: #EC4899;
+  --color-hugo: #3B82F6;
+  --color-delphine: #EC4899;
+  --color-common: #10B981;
+}
+
+/* Base styles */
+body {
+  @apply bg-gray-50 text-gray-900 antialiased;
+}
+
+/* Print styles */
+@media print {
+  /* Hide non-printable elements */
+  .no-print,
+  button,
+  header,
+  footer {
+    display: none !important;
+  }
+
+  /* Reset background */
+  body {
+    background: white !important;
+    padding: 0 !important;
+  }
+
+  /* Force colors */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Page break handling */
+  .week-view {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  /* Remove shadows and borders in print */
+  .shadow-sm,
+  .shadow {
+    box-shadow: none !important;
+  }
+
+  /* Ensure planning view takes full width */
+  .max-w-4xl,
+  .max-w-6xl {
+    max-width: 100% !important;
+  }
+}
