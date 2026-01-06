@@ -8,8 +8,9 @@ import { DaySpread } from './DaySpread'
 import { WeekOverview } from './WeekOverview'
 import { FocusArticle } from './FocusArticle'
 import { MilestoneCards } from './MilestoneCards'
+import { QuickNotes } from './QuickNotes'
 
-export function PrintablePlanning({ weeks, users, milestones, config }) {
+export function PrintablePlanning({ weeks, users, milestones, config, notes = [] }) {
   if (!weeks || weeks.length === 0) {
     return (
       <div className="printable-planning-empty p-8 text-center text-gray-500">
@@ -49,7 +50,7 @@ export function PrintablePlanning({ weeks, users, milestones, config }) {
             width: 297mm;
             min-height: 210mm;
             margin: 0;
-            padding: 12mm;
+            padding: 10mm;
             box-sizing: border-box;
           }
 
@@ -110,22 +111,23 @@ export function PrintablePlanning({ weeks, users, milestones, config }) {
           year={year}
         />
 
-        {/* Two-column layout for focus and overview */}
-        <div className="grid grid-cols-12 gap-6 mb-8">
+        {/* Three-column layout for focus, overview and notes */}
+        <div className="grid grid-cols-12 gap-4 mb-6">
           {/* Focus Article - Main column */}
-          <div className="col-span-8">
+          <div className="col-span-7">
             <FocusArticle
               milestone={focusMilestone}
               users={users}
             />
           </div>
 
-          {/* Week Overview - Side column */}
-          <div className="col-span-4">
+          {/* Sidebar: Week Overview + Quick Notes */}
+          <div className="col-span-5 space-y-4">
             <WeekOverview
               days={currentWeek.days}
               users={users}
             />
+            <QuickNotes notes={notes} maxItems={5} />
           </div>
         </div>
       </div>
@@ -133,15 +135,15 @@ export function PrintablePlanning({ weeks, users, milestones, config }) {
       {/* Page 2+: Day Spreads */}
       <div className="magazine-page">
         {/* Section title */}
-        <div className="flex items-center gap-4 mb-6 pt-4">
-          <h2 className="font-serif text-3xl font-bold text-gray-900">
+        <div className="flex items-center gap-4 mb-4 pt-2">
+          <h2 className="font-serif text-2xl font-bold text-gray-900">
             Jour par jour
           </h2>
           <div className="h-px flex-1 bg-gray-300" />
         </div>
 
         {/* Days grid - 2 columns for larger days, 3 for smaller */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-3 mb-6">
           {currentWeek.days.slice(0, 4).map((day, idx) => (
             <div key={idx} className="no-break">
               <DaySpread
@@ -155,7 +157,7 @@ export function PrintablePlanning({ weeks, users, milestones, config }) {
 
         {/* Remaining days in a different layout */}
         {currentWeek.days.length > 4 && (
-          <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-3 gap-3 mb-6">
             {currentWeek.days.slice(4).map((day, idx) => (
               <div key={idx} className="no-break">
                 <DaySpread
@@ -172,8 +174,8 @@ export function PrintablePlanning({ weeks, users, milestones, config }) {
       {milestones && milestones.length > 0 && (
         <div className="magazine-page">
           {/* Section title */}
-          <div className="flex items-center gap-4 mb-6 pt-4">
-            <h2 className="font-serif text-3xl font-bold text-gray-900">
+          <div className="flex items-center gap-4 mb-4 pt-2">
+            <h2 className="font-serif text-2xl font-bold text-gray-900">
               Nos objectifs
             </h2>
             <div className="h-px flex-1 bg-gray-300" />
@@ -186,7 +188,7 @@ export function PrintablePlanning({ weeks, users, milestones, config }) {
           />
 
           {/* Footer */}
-          <footer className="mt-auto pt-8 border-t border-gray-200">
+          <footer className="mt-auto pt-6 border-t border-gray-200">
             <div className="flex items-center justify-between text-sm text-gray-400">
               <span>Planning Familial &mdash; Semaine {currentWeek.weekNumber}</span>
               <span>
@@ -203,10 +205,10 @@ export function PrintablePlanning({ weeks, users, milestones, config }) {
 
       {/* Additional weeks if multiple */}
       {weeks.slice(1).map((week, weekIdx) => (
-        <div key={weekIdx} className="magazine-page mt-8 pt-8 border-t-2 border-gray-300">
+        <div key={weekIdx} className="magazine-page mt-6 pt-6 border-t-2 border-gray-300">
           {/* Week header */}
-          <div className="flex items-center gap-4 mb-6">
-            <h2 className="font-serif text-3xl font-bold text-gray-900">
+          <div className="flex items-center gap-4 mb-4">
+            <h2 className="font-serif text-2xl font-bold text-gray-900">
               Semaine {week.weekNumber}
             </h2>
             <div className="h-px flex-1 bg-gray-300" />
@@ -224,7 +226,7 @@ export function PrintablePlanning({ weeks, users, milestones, config }) {
           </div>
 
           {/* Overview for this week */}
-          <div className="mb-6">
+          <div className="mb-4">
             <WeekOverview
               days={week.days}
               users={users}
@@ -232,7 +234,7 @@ export function PrintablePlanning({ weeks, users, milestones, config }) {
           </div>
 
           {/* Days grid */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {week.days.map((day, idx) => (
               <div key={idx} className="no-break">
                 <DaySpread
