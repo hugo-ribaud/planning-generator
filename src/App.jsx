@@ -5,6 +5,7 @@ import { PlanningView } from './components/planning'
 import { MilestoneList } from './components/milestones'
 import { Dashboard } from './components/dashboard'
 import { Button, SyncStatus, ToastContainer } from './components/ui'
+import { PrintablePlanning } from './components/printable/dashboard'
 import { usePlanningConfig, usePlanningGenerator, useMilestones, useRealtimeSync, useToasts } from './hooks'
 import { TEST_USERS, TEST_TASKS, TEST_MILESTONES } from './utils/testData'
 
@@ -83,6 +84,7 @@ function App() {
   )
 
   const [showPlanning, setShowPlanning] = useState(false)
+  const [showPrintable, setShowPrintable] = useState(false)
 
   // Load test data for Hugo & Delphine
   const handleLoadTestData = useCallback(() => {
@@ -105,6 +107,19 @@ function App() {
   const handleReset = () => {
     reset()
     setShowPlanning(false)
+  }
+
+  // Affichage de la version imprimable dashboard
+  if (showPrintable) {
+    return (
+      <PrintablePlanning
+        users={users}
+        tasks={tasks}
+        milestones={milestones}
+        config={config}
+        onClose={() => setShowPrintable(false)}
+      />
+    )
   }
 
   return (
@@ -140,6 +155,15 @@ function App() {
                 className="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors"
               >
                 🧪 Charger données test
+              </button>
+            )}
+            {/* Print dashboard button */}
+            {(tasks.length > 0 || milestones.length > 0) && (
+              <button
+                onClick={() => setShowPrintable(true)}
+                className="px-3 py-1.5 text-xs font-medium bg-gray-900 hover:bg-gray-800 text-white rounded-full transition-colors"
+              >
+                📊 Version imprimable
               </button>
             )}
           </div>

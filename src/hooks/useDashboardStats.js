@@ -63,9 +63,7 @@ export function useDashboardStats(milestones, tasks, users, planning) {
 
     // Planning stats (if generated)
     const planningStats = planning ? {
-      totalSlots: planning.reduce((acc, week) =>
-        acc + week.days.reduce((dayAcc, day) => dayAcc + day.slots.length, 0), 0
-      ),
+      totalSlots: planning.reduce((acc, week) => acc + week.slots.length, 0),
       weeksCount: planning.length,
     } : null
 
