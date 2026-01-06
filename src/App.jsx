@@ -7,6 +7,7 @@ import { Dashboard } from './components/dashboard'
 import { Button, SyncStatus, ToastContainer } from './components/ui'
 import { usePlanningConfig, usePlanningGenerator, useMilestones, useRealtimeSync, useToasts } from './hooks'
 import { TEST_USERS, TEST_TASKS, TEST_MILESTONES } from './utils/testData'
+import { PrintablePlanning } from './components/printable/magazine'
 
 function App() {
   const {
@@ -83,6 +84,7 @@ function App() {
   )
 
   const [showPlanning, setShowPlanning] = useState(false)
+  const [showPrintable, setShowPrintable] = useState(false)
 
   // Load test data for Hugo & Delphine
   const handleLoadTestData = useCallback(() => {
@@ -105,6 +107,27 @@ function App() {
   const handleReset = () => {
     reset()
     setShowPlanning(false)
+  }
+
+  // Affichage de la version imprimable magazine
+  if (showPrintable) {
+    return (
+      <div className="relative">
+        {/* Bouton retour (masqué à l'impression) */}
+        <button
+          onClick={() => setShowPrintable(false)}
+          className="fixed top-4 right-4 z-50 px-4 py-2 bg-gray-900 text-white rounded-lg shadow-lg hover:bg-gray-800 print:hidden"
+        >
+          ← Retour
+        </button>
+        <PrintablePlanning
+          weeks={planning}
+          users={users}
+          milestones={milestones}
+          config={config}
+        />
+      </div>
+    )
   }
 
   return (
@@ -140,6 +163,15 @@ function App() {
                 className="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors"
               >
                 🧪 Charger données test
+              </button>
+            )}
+            {/* Print button */}
+            {(tasks.length > 0 || milestones.length > 0) && (
+              <button
+                onClick={() => setShowPrintable(true)}
+                className="px-3 py-1.5 text-xs font-medium bg-amber-700 hover:bg-amber-800 text-white rounded-full transition-colors"
+              >
+                📰 Version imprimable
               </button>
             )}
           </div>
