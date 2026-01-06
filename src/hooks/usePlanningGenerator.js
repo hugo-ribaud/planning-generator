@@ -83,6 +83,17 @@ export function usePlanningGenerator() {
   }, [])
 
   /**
+   * Charge un planning existant (depuis la base de données)
+   */
+  const loadPlanning = useCallback((planningData) => {
+    if (planningData) {
+      setPlanning(planningData)
+      setStats(null) // Stats will be recalculated if needed
+      setError(null)
+    }
+  }, [])
+
+  /**
    * Exporte le planning en JSON
    */
   const exportAsJson = useCallback(() => {
@@ -97,6 +108,7 @@ export function usePlanningGenerator() {
     error,
     generate,
     reset,
+    loadPlanning,
     exportAsJson,
   }
 }
