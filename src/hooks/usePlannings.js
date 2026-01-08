@@ -89,6 +89,7 @@ export function usePlannings() {
         tasks_data: planningData.tasks || [],
         milestones_data: planningData.milestones || [],
         planning_result: planningData.planningResult || null,
+        shopping_list: planningData.shoppingList || null,
       }
 
       const { data, error } = await supabase
@@ -125,6 +126,7 @@ export function usePlannings() {
       if (updates.tasks !== undefined) dbUpdates.tasks_data = updates.tasks
       if (updates.milestones !== undefined) dbUpdates.milestones_data = updates.milestones
       if (updates.planningResult !== undefined) dbUpdates.planning_result = updates.planningResult
+      if (updates.shoppingList !== undefined) dbUpdates.shopping_list = updates.shoppingList
       if (updates.isArchived !== undefined) dbUpdates.is_archived = updates.isArchived
 
       const { data, error } = await supabase
@@ -214,6 +216,7 @@ export function usePlannings() {
         tasks_data: original.tasks_data,
         milestones_data: original.milestones_data,
         planning_result: null, // Don't copy the generated result
+        shopping_list: original.shopping_list,
       }
 
       const { data, error } = await supabase
