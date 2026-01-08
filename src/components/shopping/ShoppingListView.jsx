@@ -79,97 +79,97 @@ export function ShoppingListView({
           </div>
         </div>
 
-      {/* Progress bar */}
-      {stats.totalItems > 0 && (
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <motion.div
-            className="bg-green-500 h-2 rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${stats.progress}%` }}
-            transition={{ duration: 0.3 }}
-          />
+        {/* Progress bar */}
+        {stats.totalItems > 0 && (
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <motion.div
+              className="bg-green-500 h-2 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${stats.progress}%` }}
+              transition={{ duration: 0.3 }}
+            />
+          </div>
+        )}
+
+        {/* Categories */}
+        <div className="space-y-4">
+          <AnimatePresence mode="popLayout">
+            {sortedCategories.map((category) => (
+              <ShoppingCategory
+                key={category.id}
+                category={category}
+                users={users}
+                onUpdateCategory={actions.updateCategory}
+                onRemoveCategory={actions.removeCategory}
+                onAddItem={actions.addItem}
+                onUpdateItem={actions.updateItem}
+                onRemoveItem={actions.removeItem}
+                onToggleItem={actions.toggleItem}
+                onAssignItem={actions.assignItem}
+              />
+            ))}
+          </AnimatePresence>
         </div>
-      )}
 
-      {/* Categories */}
-      <div className="space-y-4">
-        <AnimatePresence mode="popLayout">
-          {sortedCategories.map((category) => (
-            <ShoppingCategory
-              key={category.id}
-              category={category}
-              users={users}
-              onUpdateCategory={actions.updateCategory}
-              onRemoveCategory={actions.removeCategory}
-              onAddItem={actions.addItem}
-              onUpdateItem={actions.updateItem}
-              onRemoveItem={actions.removeItem}
-              onToggleItem={actions.toggleItem}
-              onAssignItem={actions.assignItem}
-            />
-          ))}
-        </AnimatePresence>
-      </div>
+        {/* Add Category */}
+        {isAddingCategory ? (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm"
+          >
+            <div className="flex items-center gap-3">
+              <input
+                type="text"
+                value={newCategoryIcon}
+                onChange={(e) => setNewCategoryIcon(e.target.value)}
+                className="w-12 h-10 text-center text-2xl border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="📦"
+                maxLength={2}
+              />
+              <Input
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Nom de la categorie..."
+                autoFocus
+                className="flex-1"
+              />
+              <Button onClick={handleAddCategory} disabled={!newCategoryName.trim()}>
+                Ajouter
+              </Button>
+              <Button variant="ghost" onClick={() => setIsAddingCategory(false)}>
+                Annuler
+              </Button>
+            </div>
+          </motion.div>
+        ) : (
+          <button
+            onClick={() => setIsAddingCategory(true)}
+            className="w-full py-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Ajouter une categorie
+          </button>
+        )}
 
-      {/* Add Category */}
-      {isAddingCategory ? (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm"
-        >
-          <div className="flex items-center gap-3">
-            <input
-              type="text"
-              value={newCategoryIcon}
-              onChange={(e) => setNewCategoryIcon(e.target.value)}
-              className="w-12 h-10 text-center text-2xl border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="📦"
-              maxLength={2}
-            />
-            <Input
-              value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Nom de la categorie..."
-              autoFocus
-              className="flex-1"
-            />
-            <Button onClick={handleAddCategory} disabled={!newCategoryName.trim()}>
-              Ajouter
-            </Button>
-            <Button variant="ghost" onClick={() => setIsAddingCategory(false)}>
-              Annuler
+        {/* Empty state */}
+        {shoppingList.categories.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">🛒</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Votre liste est vide
+            </h3>
+            <p className="text-gray-500 mb-4">
+              Commencez par ajouter une categorie pour organiser vos courses.
+            </p>
+            <Button onClick={() => setIsAddingCategory(true)}>
+              Ajouter une categorie
             </Button>
           </div>
-        </motion.div>
-      ) : (
-        <button
-          onClick={() => setIsAddingCategory(true)}
-          className="w-full py-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center gap-2"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Ajouter une categorie
-        </button>
-      )}
-
-      {/* Empty state */}
-      {shoppingList.categories.length === 0 && (
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">🛒</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Votre liste est vide
-          </h3>
-          <p className="text-gray-500 mb-4">
-            Commencez par ajouter une categorie pour organiser vos courses.
-          </p>
-          <Button onClick={() => setIsAddingCategory(true)}>
-            Ajouter une categorie
-          </Button>
-        </div>
-      )}
+        )}
 
         {/* Actions rapides */}
         {stats.totalItems > 0 && (
