@@ -1,25 +1,62 @@
 import { useState, useCallback } from 'react'
+import type { ShoppingList, ShoppingCategory, ShoppingItem } from '../types'
 
 /**
  * Categories par defaut pour une liste de courses
  */
-const DEFAULT_CATEGORIES = [
-  { id: '1', name: 'Fruits & Legumes', icon: '🥬', order: 0, items: [] },
-  { id: '2', name: 'Viandes & Poissons', icon: '🥩', order: 1, items: [] },
-  { id: '3', name: 'Produits Laitiers', icon: '🧀', order: 2, items: [] },
-  { id: '4', name: 'Boulangerie', icon: '🥖', order: 3, items: [] },
-  { id: '5', name: 'Epicerie', icon: '🥫', order: 4, items: [] },
-  { id: '6', name: 'Hygiene & Maison', icon: '🧴', order: 5, items: [] },
-  { id: '7', name: 'Surgeles', icon: '❄️', order: 6, items: [] },
-  { id: '8', name: 'Boissons', icon: '🍷', order: 7, items: [] },
+const DEFAULT_CATEGORIES: Omit<ShoppingCategory, 'id'>[] = [
+  { name: 'Fruits & Legumes', icon: '🥬', order: 0, items: [] },
+  { name: 'Viandes & Poissons', icon: '🥩', order: 1, items: [] },
+  { name: 'Produits Laitiers', icon: '🧀', order: 2, items: [] },
+  { name: 'Boulangerie', icon: '🥖', order: 3, items: [] },
+  { name: 'Epicerie', icon: '🥫', order: 4, items: [] },
+  { name: 'Hygiene & Maison', icon: '🧴', order: 5, items: [] },
+  { name: 'Surgeles', icon: '❄️', order: 6, items: [] },
+  { name: 'Boissons', icon: '🍷', order: 7, items: [] },
 ]
+
+export interface ShoppingListStats {
+  totalItems: number
+  checkedItems: number
+  uncheckedItems: number
+  progress: number
+  categoriesCount: number
+  emptyCategoriesCount: number
+}
+
+export interface UseShoppingListReturn {
+  shoppingList: ShoppingList
+  // Title
+  updateTitle: (title: string) => void
+  // Categories CRUD
+  addCategory: (category: Partial<ShoppingCategory>) => ShoppingCategory
+  updateCategory: (categoryId: string, updates: Partial<ShoppingCategory>) => void
+  removeCategory: (categoryId: string) => void
+  reorderCategories: (newOrder: string[]) => void
+  // Items CRUD
+  addItem: (categoryId: string, item: Partial<ShoppingItem>) => ShoppingItem
+  updateItem: (categoryId: string, itemId: string, updates: Partial<ShoppingItem>) => void
+  removeItem: (categoryId: string, itemId: string) => void
+  toggleItem: (categoryId: string, itemId: string) => void
+  assignItem: (categoryId: string, itemId: string, userId: string | null) => void
+  moveItem: (fromCategoryId: string, toCategoryId: string, itemId: string) => void
+  // Bulk operations
+  clearCheckedItems: () => void
+  uncheckAllItems: () => void
+  resetToDefault: () => void
+  // Load
+  loadShoppingList: (list: ShoppingList | null) => void
+  // Stats
+  getStats: () => ShoppingListStats
+  // Default categories for reference
+  DEFAULT_CATEGORIES: typeof DEFAULT_CATEGORIES
+}
 
 /**
  * Hook pour la gestion des listes de courses
- * @param {Object} initialList - Liste initiale (optionnel)
  */
-export function useShoppingList(initialList = null) {
-  const [shoppingList, setShoppingList] = useState(() => {
+export function useShoppingList(initialList: ShoppingList | null = null): UseShoppingListReturn {
+  const [shoppingList, setShoppingList] = useState<ShoppingList>(() => {
     if (initialList) {
       return initialList
     }
@@ -35,7 +72,7 @@ export function useShoppingList(initialList = null) {
   /**
    * Met a jour le titre de la liste
    */
-  const updateTitle = useCallback((title) => {
+  const updateTitle = useCallback((title: string): void => {
     setShoppingList(prev => ({
       ...prev,
       title,
@@ -46,8 +83,8 @@ export function useShoppingList(initialList = null) {
   /**
    * Ajoute une nouvelle categorie
    */
-  const addCategory = useCallback((category) => {
-    const newCategory = {
+  const addCategory = useCallback((category: Partial<ShoppingCategory>): ShoppingCategory => {
+    const newCategory: ShoppingCategory = {
       id: crypto.randomUUID(),
       name: category.name || 'Nouvelle categorie',
       icon: category.icon || '📦',
@@ -67,7 +104,7 @@ export function useShoppingList(initialList = null) {
   /**
    * Met a jour une categorie
    */
-  const updateCategory = useCallback((categoryId, updates) => {
+  const updateCategory = useCallback((categoryId: string, updates: Partial<ShoppingCategory>): void => {
     setShoppingList(prev => ({
       ...prev,
       categories: prev.categories.map(cat =>
@@ -80,7 +117,7 @@ export function useShoppingList(initialList = null) {
   /**
    * Supprime une categorie
    */
-  const removeCategory = useCallback((categoryId) => {
+  const removeCategory = useCallback((categoryId: string): void => {
     setShoppingList(prev => ({
       ...prev,
       categories: prev.categories.filter(cat => cat.id !== categoryId),
@@ -91,13 +128,13 @@ export function useShoppingList(initialList = null) {
   /**
    * Reordonne les categories
    */
-  const reorderCategories = useCallback((newOrder) => {
+  const reorderCategories = useCallback((newOrder: string[]): void => {
     setShoppingList(prev => ({
       ...prev,
       categories: newOrder.map((id, index) => {
         const cat = prev.categories.find(c => c.id === id)
         return cat ? { ...cat, order: index } : null
-      }).filter(Boolean),
+      }).filter((cat): cat is ShoppingCategory => cat !== null),
       updated_at: new Date().toISOString(),
     }))
   }, [])
@@ -105,14 +142,14 @@ export function useShoppingList(initialList = null) {
   /**
    * Ajoute un item a une categorie
    */
-  const addItem = useCallback((categoryId, item) => {
-    const newItem = {
+  const addItem = useCallback((categoryId: string, item: Partial<ShoppingItem>): ShoppingItem => {
+    const newItem: ShoppingItem = {
       id: crypto.randomUUID(),
       name: item.name || '',
       quantity: item.quantity || '1',
       unit: item.unit || '',
       is_checked: false,
-      assigned_to: item.assigned_to || null,
+      assigned_to: item.assigned_to || undefined,
       notes: item.notes || '',
     }
 
@@ -132,7 +169,7 @@ export function useShoppingList(initialList = null) {
   /**
    * Met a jour un item
    */
-  const updateItem = useCallback((categoryId, itemId, updates) => {
+  const updateItem = useCallback((categoryId: string, itemId: string, updates: Partial<ShoppingItem>): void => {
     setShoppingList(prev => ({
       ...prev,
       categories: prev.categories.map(cat =>
@@ -152,7 +189,7 @@ export function useShoppingList(initialList = null) {
   /**
    * Supprime un item
    */
-  const removeItem = useCallback((categoryId, itemId) => {
+  const removeItem = useCallback((categoryId: string, itemId: string): void => {
     setShoppingList(prev => ({
       ...prev,
       categories: prev.categories.map(cat =>
@@ -167,7 +204,7 @@ export function useShoppingList(initialList = null) {
   /**
    * Toggle le statut checked d'un item
    */
-  const toggleItem = useCallback((categoryId, itemId) => {
+  const toggleItem = useCallback((categoryId: string, itemId: string): void => {
     setShoppingList(prev => ({
       ...prev,
       categories: prev.categories.map(cat =>
@@ -187,14 +224,14 @@ export function useShoppingList(initialList = null) {
   /**
    * Assigne un item a un utilisateur
    */
-  const assignItem = useCallback((categoryId, itemId, userId) => {
-    updateItem(categoryId, itemId, { assigned_to: userId })
+  const assignItem = useCallback((categoryId: string, itemId: string, userId: string | null): void => {
+    updateItem(categoryId, itemId, { assigned_to: userId || undefined })
   }, [updateItem])
 
   /**
    * Deplace un item vers une autre categorie
    */
-  const moveItem = useCallback((fromCategoryId, toCategoryId, itemId) => {
+  const moveItem = useCallback((fromCategoryId: string, toCategoryId: string, itemId: string): void => {
     setShoppingList(prev => {
       const fromCat = prev.categories.find(c => c.id === fromCategoryId)
       const item = fromCat?.items.find(i => i.id === itemId)
@@ -220,7 +257,7 @@ export function useShoppingList(initialList = null) {
   /**
    * Vide tous les items coches
    */
-  const clearCheckedItems = useCallback(() => {
+  const clearCheckedItems = useCallback((): void => {
     setShoppingList(prev => ({
       ...prev,
       categories: prev.categories.map(cat => ({
@@ -234,7 +271,7 @@ export function useShoppingList(initialList = null) {
   /**
    * Decoche tous les items
    */
-  const uncheckAllItems = useCallback(() => {
+  const uncheckAllItems = useCallback((): void => {
     setShoppingList(prev => ({
       ...prev,
       categories: prev.categories.map(cat => ({
@@ -248,7 +285,7 @@ export function useShoppingList(initialList = null) {
   /**
    * Reinitialise la liste avec les categories par defaut
    */
-  const resetToDefault = useCallback(() => {
+  const resetToDefault = useCallback((): void => {
     setShoppingList({
       id: crypto.randomUUID(),
       title: 'Liste de courses',
@@ -261,7 +298,7 @@ export function useShoppingList(initialList = null) {
   /**
    * Charge une liste existante
    */
-  const loadShoppingList = useCallback((list) => {
+  const loadShoppingList = useCallback((list: ShoppingList | null): void => {
     if (list) {
       setShoppingList(list)
     }
@@ -270,7 +307,7 @@ export function useShoppingList(initialList = null) {
   /**
    * Retourne les statistiques de la liste
    */
-  const getStats = useCallback(() => {
+  const getStats = useCallback((): ShoppingListStats => {
     const allItems = shoppingList.categories.flatMap(cat => cat.items)
     const checkedItems = allItems.filter(item => item.is_checked)
 

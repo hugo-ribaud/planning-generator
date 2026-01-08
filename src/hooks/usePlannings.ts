@@ -6,15 +6,80 @@
 import { useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import type { Planning, User, Task, Milestone, ShoppingList, PlanningConfig } from '../types'
 
-export function usePlannings() {
+export interface FetchOptions {
+  includeArchived?: boolean
+  orderBy?: string
+  ascending?: boolean
+}
+
+export interface CreatePlanningData {
+  name?: string
+  config?: PlanningConfig
+  users?: User[]
+  tasks?: Task[]
+  milestones?: Milestone[]
+  planningResult?: unknown
+  shoppingList?: ShoppingList | null
+}
+
+export interface UpdatePlanningData {
+  name?: string
+  config?: PlanningConfig
+  users?: User[]
+  tasks?: Task[]
+  milestones?: Milestone[]
+  planningResult?: unknown
+  shoppingList?: ShoppingList | null
+  isArchived?: boolean
+}
+
+export interface ShareResult {
+  data: Planning | null
+  shareUrl?: string
+  error: Error | null
+}
+
+export interface UsePlanningsReturn {
+  // State
+  plannings: Planning[]
+  loading: boolean
+  error: string | null
+
+  // Fetch operations
+  fetchPlannings: (options?: FetchOptions) => Promise<{ data: Planning[] | null; error: Error | null }>
+  fetchPlanning: (id: string) => Promise<{ data: Planning | null; error: Error | null }>
+  fetchSharedPlanning: (shareToken: string) => Promise<{ data: Planning | null; error: Error | null }>
+
+  // CRUD operations
+  createPlanning: (planningData: CreatePlanningData) => Promise<{ data: Planning | null; error: Error | null }>
+  updatePlanning: (id: string, updates: UpdatePlanningData) => Promise<{ data: Planning | null; error: Error | null }>
+  deletePlanning: (id: string) => Promise<{ error: Error | null }>
+
+  // Archive operations
+  archivePlanning: (id: string) => Promise<{ data: Planning | null; error: Error | null }>
+  restorePlanning: (id: string) => Promise<{ data: Planning | null; error: Error | null }>
+
+  // Duplicate
+  duplicatePlanning: (id: string) => Promise<{ data: Planning | null; error: Error | null }>
+
+  // Share operations
+  sharePlanning: (id: string) => Promise<ShareResult>
+  unsharePlanning: (id: string) => Promise<{ data: Planning | null; error: Error | null }>
+
+  // Utils
+  clearError: () => void
+}
+
+export function usePlannings(): UsePlanningsReturn {
   const { user } = useAuth()
-  const [plannings, setPlannings] = useState([])
+  const [plannings, setPlannings] = useState<Planning[]>([])
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
 
   // Fetch all plannings for current user
-  const fetchPlannings = useCallback(async (options = {}) => {
+  const fetchPlannings = useCallback(async (options: FetchOptions = {}): Promise<{ data: Planning[] | null; error: Error | null }> => {
     if (!user) return { data: null, error: new Error('Not authenticated') }
 
     const { includeArchived = false, orderBy = 'updated_at', ascending = false } = options
@@ -40,15 +105,16 @@ export function usePlannings() {
       setPlannings(data || [])
       return { data, error: null }
     } catch (err) {
-      setError(err.message)
-      return { data: null, error: err }
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+      setError(errorMsg)
+      return { data: null, error: err as Error }
     } finally {
       setLoading(false)
     }
   }, [user])
 
   // Fetch a single planning by ID
-  const fetchPlanning = useCallback(async (id) => {
+  const fetchPlanning = useCallback(async (id: string): Promise<{ data: Planning | null; error: Error | null }> => {
     if (!user) return { data: null, error: new Error('Not authenticated') }
 
     setLoading(true)
@@ -66,15 +132,16 @@ export function usePlannings() {
 
       return { data, error: null }
     } catch (err) {
-      setError(err.message)
-      return { data: null, error: err }
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+      setError(errorMsg)
+      return { data: null, error: err as Error }
     } finally {
       setLoading(false)
     }
   }, [user])
 
   // Create a new planning
-  const createPlanning = useCallback(async (planningData) => {
+  const createPlanning = useCallback(async (planningData: CreatePlanningData): Promise<{ data: Planning | null; error: Error | null }> => {
     if (!user) return { data: null, error: new Error('Not authenticated') }
 
     setLoading(true)
@@ -103,15 +170,16 @@ export function usePlannings() {
       setPlannings(prev => [data, ...prev])
       return { data, error: null }
     } catch (err) {
-      setError(err.message)
-      return { data: null, error: err }
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+      setError(errorMsg)
+      return { data: null, error: err as Error }
     } finally {
       setLoading(false)
     }
   }, [user])
 
   // Update an existing planning
-  const updatePlanning = useCallback(async (id, updates) => {
+  const updatePlanning = useCallback(async (id: string, updates: UpdatePlanningData): Promise<{ data: Planning | null; error: Error | null }> => {
     if (!user) return { data: null, error: new Error('Not authenticated') }
 
     setLoading(true)
@@ -119,7 +187,7 @@ export function usePlannings() {
 
     try {
       // Map frontend fields to database fields
-      const dbUpdates = {}
+      const dbUpdates: Record<string, unknown> = {}
       if (updates.name !== undefined) dbUpdates.name = updates.name
       if (updates.config !== undefined) dbUpdates.config = updates.config
       if (updates.users !== undefined) dbUpdates.users_data = updates.users
@@ -144,15 +212,16 @@ export function usePlannings() {
 
       return { data, error: null }
     } catch (err) {
-      setError(err.message)
-      return { data: null, error: err }
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+      setError(errorMsg)
+      return { data: null, error: err as Error }
     } finally {
       setLoading(false)
     }
   }, [user])
 
   // Delete a planning
-  const deletePlanning = useCallback(async (id) => {
+  const deletePlanning = useCallback(async (id: string): Promise<{ error: Error | null }> => {
     if (!user) return { error: new Error('Not authenticated') }
 
     setLoading(true)
@@ -172,25 +241,26 @@ export function usePlannings() {
 
       return { error: null }
     } catch (err) {
-      setError(err.message)
-      return { error: err }
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+      setError(errorMsg)
+      return { error: err as Error }
     } finally {
       setLoading(false)
     }
   }, [user])
 
   // Archive a planning
-  const archivePlanning = useCallback(async (id) => {
+  const archivePlanning = useCallback(async (id: string): Promise<{ data: Planning | null; error: Error | null }> => {
     return updatePlanning(id, { isArchived: true })
   }, [updatePlanning])
 
   // Restore a planning from archive
-  const restorePlanning = useCallback(async (id) => {
+  const restorePlanning = useCallback(async (id: string): Promise<{ data: Planning | null; error: Error | null }> => {
     return updatePlanning(id, { isArchived: false })
   }, [updatePlanning])
 
   // Duplicate a planning
-  const duplicatePlanning = useCallback(async (id) => {
+  const duplicatePlanning = useCallback(async (id: string): Promise<{ data: Planning | null; error: Error | null }> => {
     if (!user) return { data: null, error: new Error('Not authenticated') }
 
     setLoading(true)
@@ -230,15 +300,16 @@ export function usePlannings() {
       setPlannings(prev => [data, ...prev])
       return { data, error: null }
     } catch (err) {
-      setError(err.message)
-      return { data: null, error: err }
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+      setError(errorMsg)
+      return { data: null, error: err as Error }
     } finally {
       setLoading(false)
     }
   }, [user])
 
   // Generate share token for a planning
-  const sharePlanning = useCallback(async (id) => {
+  const sharePlanning = useCallback(async (id: string): Promise<ShareResult> => {
     if (!user) return { data: null, error: new Error('Not authenticated') }
 
     setLoading(true)
@@ -266,15 +337,16 @@ export function usePlannings() {
 
       return { data, shareUrl: `${window.location.origin}/shared/${shareToken}`, error: null }
     } catch (err) {
-      setError(err.message)
-      return { data: null, error: err }
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+      setError(errorMsg)
+      return { data: null, error: err as Error }
     } finally {
       setLoading(false)
     }
   }, [user])
 
   // Remove share from a planning
-  const unsharePlanning = useCallback(async (id) => {
+  const unsharePlanning = useCallback(async (id: string): Promise<{ data: Planning | null; error: Error | null }> => {
     if (!user) return { data: null, error: new Error('Not authenticated') }
 
     setLoading(true)
@@ -299,15 +371,16 @@ export function usePlannings() {
 
       return { data, error: null }
     } catch (err) {
-      setError(err.message)
-      return { data: null, error: err }
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+      setError(errorMsg)
+      return { data: null, error: err as Error }
     } finally {
       setLoading(false)
     }
   }, [user])
 
   // Fetch a shared planning by token (public access)
-  const fetchSharedPlanning = useCallback(async (shareToken) => {
+  const fetchSharedPlanning = useCallback(async (shareToken: string): Promise<{ data: Planning | null; error: Error | null }> => {
     setLoading(true)
     setError(null)
 
@@ -323,15 +396,16 @@ export function usePlannings() {
 
       return { data, error: null }
     } catch (err) {
-      setError(err.message)
-      return { data: null, error: err }
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+      setError(errorMsg)
+      return { data: null, error: err as Error }
     } finally {
       setLoading(false)
     }
   }, [])
 
   // Clear error
-  const clearError = useCallback(() => {
+  const clearError = useCallback((): void => {
     setError(null)
   }, [])
 

@@ -1,24 +1,52 @@
 import { useState, useCallback } from 'react'
 import { generatePlanning, exportPlanning } from '../utils/planningAlgorithm'
+import type { User, Task, PlanningWeek, PlanningStats, ExportedPlanning } from '../types'
+
+export interface AlgoConfig {
+  period?: string
+  startDate?: string
+  workStart?: string
+  workEnd?: string
+  lunchStart?: string
+  lunchEnd?: string
+  slotDuration?: number
+}
+
+export interface GenerateResult {
+  planning: PlanningWeek[]
+  grid: unknown
+  stats: PlanningStats
+}
+
+export interface UsePlanningGeneratorReturn {
+  planning: PlanningWeek[] | null
+  stats: PlanningStats | null
+  isGenerating: boolean
+  error: string | null
+  generate: (config: AlgoConfig, users: User[], tasks: Task[]) => GenerateResult | null
+  reset: () => void
+  loadPlanning: (planningData: PlanningWeek[] | null) => void
+  exportAsJson: () => ExportedPlanning | null
+}
 
 /**
- * Hook pour la génération de planning
+ * Hook pour la generation de planning
  */
-export function usePlanningGenerator() {
-  const [planning, setPlanning] = useState(null)
-  const [stats, setStats] = useState(null)
+export function usePlanningGenerator(): UsePlanningGeneratorReturn {
+  const [planning, setPlanning] = useState<PlanningWeek[] | null>(null)
+  const [stats, setStats] = useState<PlanningStats | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
 
   /**
-   * Génère un planning à partir de la configuration
+   * Genere un planning a partir de la configuration
    */
-  const generate = useCallback((config, users, tasks) => {
+  const generate = useCallback((config: AlgoConfig, users: User[], tasks: Task[]): GenerateResult | null => {
     setIsGenerating(true)
     setError(null)
 
     try {
-      // Préparer la configuration pour l'algorithme
+      // Preparer la configuration pour l'algorithme
       const algoConfig = {
         period: config.period || 'week',
         startDate: config.startDate || new Date().toISOString().split('T')[0],
@@ -29,19 +57,19 @@ export function usePlanningGenerator() {
         slotDuration: config.slotDuration || 30,
       }
 
-      // Préparer les utilisateurs
+      // Preparer les utilisateurs
       const algoUsers = users
         .filter(u => u.name && u.name.trim())
         .map(u => ({
           ...u,
-          days_off: u.days_off || [],
+          daysOff: u.daysOff || [],
         }))
 
       if (algoUsers.length === 0) {
         throw new Error('Au moins un utilisateur est requis')
       }
 
-      // Préparer les tâches
+      // Preparer les taches
       const algoTasks = tasks
         .filter(t => t.name && t.name.trim())
         .map(t => ({
@@ -55,10 +83,10 @@ export function usePlanningGenerator() {
         }))
 
       if (algoTasks.length === 0) {
-        throw new Error('Au moins une tâche est requise')
+        throw new Error('Au moins une tache est requise')
       }
 
-      // Générer le planning
+      // Generer le planning
       const result = generatePlanning(algoConfig, algoUsers, algoTasks)
 
       setPlanning(result.planning)
@@ -67,25 +95,26 @@ export function usePlanningGenerator() {
 
       return result
     } catch (err) {
-      setError(err.message)
+      const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue'
+      setError(errorMessage)
       setIsGenerating(false)
       return null
     }
   }, [])
 
   /**
-   * Réinitialise le planning
+   * Reinitialise le planning
    */
-  const reset = useCallback(() => {
+  const reset = useCallback((): void => {
     setPlanning(null)
     setStats(null)
     setError(null)
   }, [])
 
   /**
-   * Charge un planning existant (depuis la base de données)
+   * Charge un planning existant (depuis la base de donnees)
    */
-  const loadPlanning = useCallback((planningData) => {
+  const loadPlanning = useCallback((planningData: PlanningWeek[] | null): void => {
     if (planningData) {
       setPlanning(planningData)
       setStats(null) // Stats will be recalculated if needed
@@ -96,7 +125,7 @@ export function usePlanningGenerator() {
   /**
    * Exporte le planning en JSON
    */
-  const exportAsJson = useCallback(() => {
+  const exportAsJson = useCallback((): ExportedPlanning | null => {
     if (!planning) return null
     return exportPlanning(planning)
   }, [planning])

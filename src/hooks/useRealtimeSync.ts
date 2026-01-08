@@ -1,19 +1,34 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
+import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js'
+import type { Planning } from '../types'
+
+export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error'
+
+export interface RealtimeHandlers {
+  onUpdate?: (payload: RealtimePostgresChangesPayload<Planning>) => void
+}
+
+export interface UseRealtimeSyncReturn {
+  connectionStatus: ConnectionStatus
+  lastSync: Date | null
+  reconnect: () => void
+  isConnected: boolean
+  isConnecting: boolean
+  hasError: boolean
+}
 
 /**
- * Hook pour la synchronisation temps réel via Supabase Realtime
- * Écoute les changements sur la table plannings (structure JSONB)
- *
- * @param {string} planningId - ID du planning à synchroniser
- * @param {Object} handlers - Callbacks pour les mises à jour
- * @param {Function} handlers.onUpdate - Callback appelé lors d'une mise à jour
- * @returns {Object} État de connexion et fonctions utilitaires
+ * Hook pour la synchronisation temps reel via Supabase Realtime
+ * Ecoute les changements sur la table plannings (structure JSONB)
  */
-export function useRealtimeSync(planningId, handlers = {}) {
-  const [connectionStatus, setConnectionStatus] = useState('disconnected')
-  const [lastSync, setLastSync] = useState(null)
-  const channelRef = useRef(null)
+export function useRealtimeSync(
+  planningId: string | null | undefined,
+  handlers: RealtimeHandlers = {}
+): UseRealtimeSyncReturn {
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected')
+  const [lastSync, setLastSync] = useState<Date | null>(null)
+  const channelRef = useRef<RealtimeChannel | null>(null)
   const handlersRef = useRef(handlers)
 
   // Keep handlers ref updated to avoid stale closures
@@ -22,7 +37,7 @@ export function useRealtimeSync(planningId, handlers = {}) {
   }, [handlers])
 
   // Handle realtime updates from plannings table
-  const handlePayload = useCallback((payload) => {
+  const handlePayload = useCallback((payload: RealtimePostgresChangesPayload<Planning>) => {
     setLastSync(new Date())
 
     // Only process UPDATE events (INSERT/DELETE are handled by navigation)
@@ -53,7 +68,7 @@ export function useRealtimeSync(planningId, handlers = {}) {
           table: 'plannings',
           filter: `id=eq.${planningId}`
         },
-        (payload) => handlePayload(payload)
+        (payload) => handlePayload(payload as RealtimePostgresChangesPayload<Planning>)
       )
       .subscribe((status) => {
         switch (status) {
@@ -102,14 +117,14 @@ export function useRealtimeSync(planningId, handlers = {}) {
 }
 
 /**
- * Détecte les champs modifiés entre l'ancien et le nouveau payload
- * @param {Object} oldData - Anciennes données
- * @param {Object} newData - Nouvelles données
- * @returns {Array<string>} Liste des champs modifiés
+ * Detecte les champs modifies entre l'ancien et le nouveau payload
  */
-export function detectChangedFields(oldData, newData) {
-  const changedFields = []
-  const fieldsToCheck = ['config', 'users_data', 'tasks_data', 'milestones_data', 'planning_result', 'name']
+export function detectChangedFields(
+  oldData: Partial<Planning> | null | undefined,
+  newData: Partial<Planning> | null | undefined
+): string[] {
+  const changedFields: string[] = []
+  const fieldsToCheck: (keyof Planning)[] = ['config', 'users_data', 'tasks_data', 'milestones_data', 'planning_result', 'name']
 
   for (const field of fieldsToCheck) {
     const oldValue = JSON.stringify(oldData?.[field])
@@ -124,16 +139,14 @@ export function detectChangedFields(oldData, newData) {
 
 /**
  * Mappe les noms de champs DB vers des labels lisibles
- * @param {string} field - Nom du champ DB
- * @returns {string} Label en français
  */
-export function getFieldLabel(field) {
-  const labels = {
+export function getFieldLabel(field: string): string {
+  const labels: Record<string, string> = {
     config: 'configuration',
     users_data: 'utilisateurs',
-    tasks_data: 'tâches',
+    tasks_data: 'taches',
     milestones_data: 'objectifs',
-    planning_result: 'planning généré',
+    planning_result: 'planning genere',
     name: 'nom',
   }
   return labels[field] || field
