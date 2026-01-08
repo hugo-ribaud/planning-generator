@@ -11,7 +11,7 @@ import { PlanningView } from '../components/planning'
 import { MilestoneList } from '../components/milestones'
 import { Dashboard } from '../components/dashboard'
 import { Button, SyncStatus, ToastContainer } from '../components/ui'
-import { usePlanningConfig, usePlanningGenerator, useMilestones, useRealtimeSync, useToasts } from '../hooks'
+import { usePlanningConfig, usePlanningGenerator, useMilestones, useRealtimeSync, useToasts, detectChangedFields, getFieldLabel } from '../hooks'
 import { usePlannings } from '../hooks/usePlannings'
 import { useAuth } from '../contexts/AuthContext'
 import { TEST_USERS, TEST_TASKS, TEST_MILESTONES } from '../utils/testData'
@@ -79,34 +79,90 @@ export function PlanningEditorPage() {
   // Auto-save ref to track changes
   const autoSaveTimerRef = useRef(null)
 
-  // Realtime sync handlers
-  const handleRealtimeUpdate = useCallback((table, payload) => {
-    const eventLabels = {
-      INSERT: 'ajoute',
-      UPDATE: 'modifie',
-      DELETE: 'supprime',
-    }
-    const tableLabels = {
-      milestones: 'objectif',
-      tasks: 'tache',
-      slots: 'creneau',
-      config: 'configuration',
+  // Track the last update timestamp to avoid re-applying our own changes
+  const lastUpdateRef = useRef(null)
+
+  // Realtime sync handler - updates React state when remote changes arrive
+  const handleRealtimeUpdate = useCallback((payload) => {
+    const newData = payload.new
+    const oldData = payload.old
+
+    // Skip if this is our own update (same updated_at timestamp)
+    if (lastUpdateRef.current && newData.updated_at === lastUpdateRef.current) {
+      console.log('Skipping own update')
+      return
     }
 
-    toast.sync(
-      `${tableLabels[table] || table} ${eventLabels[payload.eventType] || 'modifie'} depuis un autre appareil`
-    )
-    console.log(`Realtime update [${table}]:`, payload)
-  }, [toast])
+    // Detect which fields changed
+    const changedFields = detectChangedFields(oldData, newData)
 
-  // Realtime sync
+    if (changedFields.length === 0) {
+      return
+    }
+
+    // Build human-readable change description
+    const changedLabels = changedFields.map(getFieldLabel).join(', ')
+    toast.sync(`${changedLabels} modifie(s) depuis un autre appareil`)
+
+    console.log('Realtime update received:', { changedFields, payload })
+
+    // Update React state for each changed field
+    for (const field of changedFields) {
+      switch (field) {
+        case 'config':
+          if (newData.config) {
+            loadConfig(newData.config)
+          }
+          break
+        case 'users_data':
+          if (newData.users_data) {
+            loadUsers(newData.users_data)
+          }
+          break
+        case 'tasks_data':
+          if (newData.tasks_data) {
+            loadTasks(newData.tasks_data)
+          }
+          break
+        case 'milestones_data':
+          if (newData.milestones_data) {
+            loadMilestones(newData.milestones_data)
+          }
+          break
+        case 'planning_result':
+          if (newData.planning_result) {
+            loadPlanning(newData.planning_result)
+            setShowPlanning(true)
+          } else {
+            // Planning was cleared
+            loadPlanning(null)
+            setShowPlanning(false)
+          }
+          break
+        case 'name':
+          if (newData.name) {
+            setPlanningName(newData.name)
+          }
+          break
+        default:
+          break
+      }
+    }
+
+    // Update last saved time from remote
+    if (newData.updated_at) {
+      setLastSaved(new Date(newData.updated_at))
+    }
+
+    // Reset unsaved changes flag since we just synced
+    setHasUnsavedChanges(false)
+  }, [toast, loadConfig, loadUsers, loadTasks, loadMilestones, loadPlanning])
+
+  // Realtime sync - subscribe to plannings table updates
   const { connectionStatus, lastSync, reconnect, isConnected } = useRealtimeSync(
-    config.id || null,
+    currentPlanningId,
     {
-      milestones: (payload) => handleRealtimeUpdate('milestones', payload),
-      tasks: (payload) => handleRealtimeUpdate('tasks', payload),
-      slots: (payload) => handleRealtimeUpdate('slots', payload),
-      config: (payload) => handleRealtimeUpdate('config', payload),
+      onUpdate: handleRealtimeUpdate,
     }
   )
 
@@ -185,8 +241,13 @@ export function PlanningEditorPage() {
     try {
       if (currentPlanningId) {
         // Update existing
-        const { error } = await updatePlanning(currentPlanningId, planningData)
+        const { data, error } = await updatePlanning(currentPlanningId, planningData)
         if (error) throw error
+
+        // Track our own update timestamp to avoid re-applying it via realtime
+        if (data?.updated_at) {
+          lastUpdateRef.current = data.updated_at
+        }
       } else {
         // Create new
         const { data, error } = await createPlanning(planningData)
@@ -194,6 +255,11 @@ export function PlanningEditorPage() {
         setCurrentPlanningId(data.id)
         // Update URL without reload
         window.history.replaceState(null, '', `/planning/${data.id}`)
+
+        // Track our own update timestamp
+        if (data?.updated_at) {
+          lastUpdateRef.current = data.updated_at
+        }
       }
 
       setHasUnsavedChanges(false)
