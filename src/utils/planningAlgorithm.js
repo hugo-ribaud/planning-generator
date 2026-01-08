@@ -4,6 +4,7 @@
 
 import { createEmptyGrid, findAvailableSlot, placeTaskInGrid } from './gridUtils'
 import { getWeekNumber } from './dateUtils'
+import { PRIORITIES, DEFAULT_DURATIONS } from './constants'
 
 /**
  * Génère un planning automatique
@@ -64,8 +65,8 @@ export function generatePlanning(config, users, tasks) {
  */
 function sortTasksByPriority(tasks) {
   return [...tasks].sort((a, b) => {
-    // Priorité: 1=urgent, 2=haute, 3=normale, 4=basse
-    const priorityDiff = (a.priority || 3) - (b.priority || 3)
+    // Priorité: URGENT(1), HIGH(2), NORMAL(3), LOW(4)
+    const priorityDiff = (a.priority || PRIORITIES.NORMAL) - (b.priority || PRIORITIES.NORMAL)
     if (priorityDiff !== 0) return priorityDiff
 
     // À priorité égale, tâches common en premier
@@ -73,7 +74,7 @@ function sortTasksByPriority(tasks) {
     if (b.type === 'common' && a.type !== 'common') return 1
 
     // Ensuite par durée décroissante (les plus longues d'abord)
-    return (b.duration || 30) - (a.duration || 30)
+    return (b.duration || DEFAULT_DURATIONS.SHORT) - (a.duration || DEFAULT_DURATIONS.SHORT)
   })
 }
 
