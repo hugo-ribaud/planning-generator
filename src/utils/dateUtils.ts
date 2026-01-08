@@ -2,12 +2,12 @@
  * Utilitaires pour la manipulation des dates
  */
 
-import { DAYS_OF_WEEK } from '../data/defaults'
+import { DAYS_OF_WEEK } from './constants'
 
 /**
  * Retourne le lundi de la semaine d'une date
  */
-export function getMonday(date) {
+export function getMonday(date: Date): Date {
   const d = new Date(date)
   const day = d.getDay()
   const diff = d.getDate() - day + (day === 0 ? -6 : 1) // Ajuste si dimanche
@@ -15,9 +15,9 @@ export function getMonday(date) {
 }
 
 /**
- * Ajoute des jours à une date
+ * Ajoute des jours a une date
  */
-export function addDays(date, days) {
+export function addDays(date: Date, days: number): Date {
   const result = new Date(date)
   result.setDate(result.getDate() + days)
   return result
@@ -26,14 +26,14 @@ export function addDays(date, days) {
 /**
  * Formate une date en YYYY-MM-DD
  */
-export function formatDate(date) {
+export function formatDate(date: Date): string {
   return date.toISOString().split('T')[0]
 }
 
 /**
- * Formate une date en français (ex: "Lundi 6 janvier")
+ * Formate une date en francais (ex: "Lundi 6 janvier")
  */
-export function formatDateFr(date) {
+export function formatDateFr(date: Date): string {
   return date.toLocaleDateString('fr-FR', {
     weekday: 'long',
     day: 'numeric',
@@ -42,29 +42,29 @@ export function formatDateFr(date) {
 }
 
 /**
- * Retourne le nom du jour en français pour une date
+ * Retourne le nom du jour en francais pour une date
  */
-export function getDayName(date) {
+export function getDayName(date: Date): string {
   const dayIndex = date.getDay()
   // getDay() retourne 0=dimanche, 1=lundi, etc.
   // Notre array est lundi=0, mardi=1, etc.
   const adjustedIndex = dayIndex === 0 ? 6 : dayIndex - 1
-  return DAYS_OF_WEEK[adjustedIndex].value
+  return DAYS_OF_WEEK[adjustedIndex].key
 }
 
 /**
  * Retourne l'index du jour (0=lundi, 6=dimanche)
  */
-export function getDayIndex(dayName) {
-  return DAYS_OF_WEEK.findIndex(d => d.value === dayName)
+export function getDayIndex(dayName: string): number {
+  return DAYS_OF_WEEK.findIndex(d => d.key === dayName)
 }
 
 /**
- * Génère les dates d'une semaine à partir d'une date de début
+ * Genere les dates d'une semaine a partir d'une date de debut
  */
-export function getWeekDates(startDate) {
+export function getWeekDates(startDate: Date): Date[] {
   const monday = getMonday(startDate)
-  const dates = []
+  const dates: Date[] = []
 
   for (let i = 0; i < 7; i++) {
     dates.push(addDays(monday, i))
@@ -74,10 +74,10 @@ export function getWeekDates(startDate) {
 }
 
 /**
- * Génère les dates d'un mois à partir d'une date de début
+ * Genere les dates d'un mois a partir d'une date de debut
  */
-export function getMonthDates(startDate) {
-  const dates = []
+export function getMonthDates(startDate: Date): Date[] {
+  const dates: Date[] = []
   const start = new Date(startDate)
   const year = start.getFullYear()
   const month = start.getMonth()
@@ -93,20 +93,20 @@ export function getMonthDates(startDate) {
 }
 
 /**
- * Retourne le numéro de semaine ISO d'une date
+ * Retourne le numero de semaine ISO d'une date
  */
-export function getWeekNumber(date) {
+export function getWeekNumber(date: Date): number {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
   const dayNum = d.getUTCDay() || 7
   d.setUTCDate(d.getUTCDate() + 4 - dayNum)
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
+  return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
 }
 
 /**
- * Vérifie si une date est un jour off pour un utilisateur
+ * Verifie si une date est un jour off pour un utilisateur
  */
-export function isDayOff(date, daysOff = []) {
+export function isDayOff(date: Date, daysOff: string[] = []): boolean {
   const dayName = getDayName(date)
   return daysOff.includes(dayName)
 }

@@ -5,28 +5,89 @@
 import { generateDaySlots } from './timeUtils'
 import { getWeekDates, getMonthDates, getDayName, isDayOff, getWeekNumber } from './dateUtils'
 import { WORK_HOURS, DEFAULT_DURATIONS } from './constants'
+import type { User, Task, PlanningConfig, TimePreference } from '../types'
+
+// Types pour la grille
+export interface GridSlot {
+  startTime: string
+  endTime: string
+  available: boolean
+  task: Task | null
+  blockedBy?: string
+  duration?: number
+}
+
+export interface GridColumn {
+  slots: GridSlot[]
+  userId?: string
+  userName?: string
+  isDayOff?: boolean
+}
+
+export interface GridDay {
+  date: Date
+  dayName: string
+  weekNumber: number
+  columns: Record<string, GridColumn>
+}
+
+export interface Grid {
+  period: string
+  startDate: Date
+  days: GridDay[]
+  users: User[]
+}
+
+export interface FoundSlot {
+  dayIndex: number
+  slotIndex: number
+  day: GridDay
+  slot: GridSlot
+  slotsNeeded: number
+}
+
+export interface FindSlotOptions {
+  preferredTime?: TimePreference
+  preferredDays?: string[]
+  startDayIndex?: number
+}
+
+interface ExtendedConfig extends PlanningConfig {
+  period?: string
+  startDate?: string | Date
+  workStart?: string
+  workEnd?: string
+  lunchStart?: string
+  lunchEnd?: string
+}
 
 /**
- * Crée une grille vide pour le planning
- * @param {Object} config - Configuration générale
- * @param {Array} users - Liste des utilisateurs
- * @returns {Object} Grille avec dates et créneaux disponibles
+ * Cree une grille vide pour le planning
  */
-export function createEmptyGrid(config, users) {
-  const { period, startDate, workStart, workEnd, lunchStart, lunchEnd, slotDuration } = config
+export function createEmptyGrid(config: ExtendedConfig, users: User[]): Grid {
+  const {
+    period = 'week',
+    startDate = new Date(),
+    workStart = '09:00',
+    workEnd = '17:00',
+    lunchStart = '12:00',
+    lunchEnd = '13:00',
+    slotDuration
+  } = config
 
-  // Obtenir les dates selon la période
+  // Obtenir les dates selon la periode
+  const startDateObj = typeof startDate === 'string' ? new Date(startDate) : startDate
   const dates = period === 'week'
-    ? getWeekDates(startDate)
-    : getMonthDates(startDate)
+    ? getWeekDates(startDateObj)
+    : getMonthDates(startDateObj)
 
-  // Générer les créneaux types pour une journée
+  // Generer les creneaux types pour une journee
   const daySlotTemplate = generateDaySlots(workStart, workEnd, lunchStart, lunchEnd, slotDuration)
 
-  // Créer la grille
-  const grid = {
+  // Creer la grille
+  const grid: Grid = {
     period,
-    startDate: new Date(startDate),
+    startDate: startDateObj,
     days: [],
     users,
   }
@@ -35,8 +96,8 @@ export function createEmptyGrid(config, users) {
   for (const date of dates) {
     const dayName = getDayName(date)
 
-    // Créer les colonnes (une par utilisateur + common)
-    const columns = {
+    // Creer les colonnes (une par utilisateur + common)
+    const columns: Record<string, GridColumn> = {
       common: {
         slots: daySlotTemplate.map(slot => ({
           ...slot,
@@ -48,7 +109,7 @@ export function createEmptyGrid(config, users) {
 
     // Ajouter une colonne par utilisateur
     for (const user of users) {
-      const userDayOff = isDayOff(date, user.days_off)
+      const userDayOff = isDayOff(date, user.daysOff || [])
 
       columns[user.id] = {
         userId: user.id,
@@ -74,60 +135,62 @@ export function createEmptyGrid(config, users) {
 }
 
 /**
- * Trouve le premier créneau disponible pour une tâche
- * @param {Object} grid - La grille de planning
- * @param {Object} task - La tâche à placer
- * @param {Object} options - Options de recherche
- * @returns {Object|null} Le créneau trouvé ou null
+ * Trouve le premier creneau disponible pour une tache
  */
-export function findAvailableSlot(grid, task, options = {}) {
+export function findAvailableSlot(
+  grid: Grid,
+  task: Task,
+  options: FindSlotOptions = {}
+): FoundSlot | null {
   const {
     preferredTime = 'any',
     preferredDays = [],
     startDayIndex = 0,
   } = options
 
-  const slotsNeeded = Math.ceil(task.duration / grid.days[0]?.columns.common.slots[0]?.duration || DEFAULT_DURATIONS.SHORT)
+  const firstSlot = grid.days[0]?.columns.common.slots[0]
+  const slotDuration = firstSlot?.duration || DEFAULT_DURATIONS.SHORT
+  const slotsNeeded = Math.ceil(task.duration / slotDuration)
 
-  // Déterminer la colonne cible
+  // Determiner la colonne cible
   const targetColumn = task.assignedTo === 'common' ? 'common' : task.assignedTo
 
   // Parcourir les jours
   for (let dayIdx = startDayIndex; dayIdx < grid.days.length; dayIdx++) {
     const day = grid.days[dayIdx]
 
-    // Vérifier les jours préférés si spécifiés
+    // Verifier les jours preferes si specifies
     if (preferredDays.length > 0 && !preferredDays.includes(day.dayName)) {
       continue
     }
 
-    const column = day.columns[targetColumn]
+    const column = targetColumn ? day.columns[targetColumn] : null
     if (!column) continue
 
-    // Vérifier si jour off pour l'utilisateur
+    // Verifier si jour off pour l'utilisateur
     if (column.isDayOff) continue
 
-    // Parcourir les créneaux
+    // Parcourir les creneaux
     for (let slotIdx = 0; slotIdx < column.slots.length; slotIdx++) {
       const slot = column.slots[slotIdx]
 
-      // Vérifier la préférence horaire
+      // Verifier la preference horaire
       if (!matchesTimePreference(slot.startTime, preferredTime)) {
         continue
       }
 
-      // Vérifier la disponibilité du créneau
+      // Verifier la disponibilite du creneau
       if (!slot.available || slot.task) {
         continue
       }
 
-      // Pour les tâches common, vérifier aussi les colonnes utilisateurs
+      // Pour les taches common, verifier aussi les colonnes utilisateurs
       if (task.assignedTo === 'common' || task.type === 'common') {
         const allAvailable = checkAllColumnsAvailable(day, slotIdx, grid.users)
         if (!allAvailable) continue
       }
 
-      // Vérifier s'il y a assez de créneaux consécutifs
+      // Verifier s'il y a assez de creneaux consecutifs
       if (slotsNeeded > 1) {
         const consecutiveAvailable = checkConsecutiveSlots(column.slots, slotIdx, slotsNeeded)
         if (!consecutiveAvailable) continue
@@ -147,9 +210,9 @@ export function findAvailableSlot(grid, task, options = {}) {
 }
 
 /**
- * Vérifie si un horaire correspond à la préférence
+ * Verifie si un horaire correspond a la preference
  */
-function matchesTimePreference(startTime, preference) {
+function matchesTimePreference(startTime: string, preference: TimePreference): boolean {
   if (preference === 'any') return true
 
   const hour = parseInt(startTime.split(':')[0], 10)
@@ -167,9 +230,9 @@ function matchesTimePreference(startTime, preference) {
 }
 
 /**
- * Vérifie si tous les utilisateurs ont le créneau disponible
+ * Verifie si tous les utilisateurs ont le creneau disponible
  */
-function checkAllColumnsAvailable(day, slotIndex, users) {
+function checkAllColumnsAvailable(day: GridDay, slotIndex: number, users: User[]): boolean {
   for (const user of users) {
     const userColumn = day.columns[user.id]
     if (!userColumn) return false
@@ -181,9 +244,9 @@ function checkAllColumnsAvailable(day, slotIndex, users) {
 }
 
 /**
- * Vérifie s'il y a assez de créneaux consécutifs disponibles
+ * Verifie s'il y a assez de creneaux consecutifs disponibles
  */
-function checkConsecutiveSlots(slots, startIndex, needed) {
+function checkConsecutiveSlots(slots: GridSlot[], startIndex: number, needed: number): boolean {
   for (let i = 0; i < needed; i++) {
     const slot = slots[startIndex + i]
     if (!slot || !slot.available || slot.task) {
@@ -194,26 +257,23 @@ function checkConsecutiveSlots(slots, startIndex, needed) {
 }
 
 /**
- * Place une tâche dans la grille
- * @param {Object} grid - La grille (sera modifiée)
- * @param {Object} task - La tâche à placer
- * @param {Object} placement - Position du placement
+ * Place une tache dans la grille
  */
-export function placeTaskInGrid(grid, task, placement) {
+export function placeTaskInGrid(grid: Grid, task: Task, placement: FoundSlot): void {
   const { dayIndex, slotIndex, slotsNeeded } = placement
   const day = grid.days[dayIndex]
   const targetColumn = task.assignedTo === 'common' ? 'common' : task.assignedTo
 
   // Placer dans la colonne cible
   for (let i = 0; i < slotsNeeded; i++) {
-    const column = day.columns[targetColumn]
+    const column = targetColumn ? day.columns[targetColumn] : null
     if (column && column.slots[slotIndex + i]) {
       column.slots[slotIndex + i].task = task
       column.slots[slotIndex + i].available = false
     }
   }
 
-  // Si tâche common, marquer aussi les colonnes utilisateurs
+  // Si tache common, marquer aussi les colonnes utilisateurs
   if (task.assignedTo === 'common' || task.type === 'common') {
     for (const user of grid.users) {
       const userColumn = day.columns[user.id]
@@ -228,9 +288,9 @@ export function placeTaskInGrid(grid, task, placement) {
 }
 
 /**
- * Compte les créneaux disponibles restants
+ * Compte les creneaux disponibles restants
  */
-export function countAvailableSlots(grid, userId = null) {
+export function countAvailableSlots(grid: Grid, userId: string | null = null): number {
   let count = 0
 
   for (const day of grid.days) {

@@ -1,49 +1,108 @@
 /**
- * Algorithme de placement automatique des tâches
+ * Algorithme de placement automatique des taches
  */
 
-import { createEmptyGrid, findAvailableSlot, placeTaskInGrid } from './gridUtils'
-import { getWeekNumber } from './dateUtils'
+import { createEmptyGrid, findAvailableSlot, placeTaskInGrid, Grid, GridSlot, FoundSlot, GridDay } from './gridUtils'
 import { PRIORITIES, DEFAULT_DURATIONS } from './constants'
+import type { Task, User, PlanningConfig, TimePreference } from '../types'
+
+// Types pour les statistiques
+export interface PlacedTask {
+  task: Task
+  day: Date
+  slot: GridSlot
+}
+
+export interface FailedTask {
+  task: Task
+  reason: string
+}
+
+export interface PlanningStats {
+  placed: PlacedTask[]
+  failed: FailedTask[]
+  total: number
+  successRate?: number
+}
+
+export interface WeekSlot {
+  day: Date
+  dayName: string
+  startTime: string
+  endTime: string
+  task: Task
+  column: string
+}
+
+export interface PlanningWeek {
+  weekNumber: number
+  startDate: Date
+  slots: WeekSlot[]
+  days: GridDay[]
+}
+
+export interface GeneratedPlanning {
+  planning: PlanningWeek[]
+  grid: Grid
+  stats: PlanningStats
+}
+
+export interface ExportedPlanning {
+  generatedAt: string
+  weeks: {
+    weekNumber: number
+    startDate: string
+    slots: {
+      day: string
+      dayName: string
+      startTime: string
+      endTime: string
+      taskId: string
+      taskName: string
+      taskColor?: string
+      column: string
+    }[]
+  }[]
+}
 
 /**
- * Génère un planning automatique
- * @param {Object} config - Configuration générale
- * @param {Array} users - Liste des utilisateurs
- * @param {Array} tasks - Liste des tâches à placer
- * @returns {Object} Planning généré avec statistiques
+ * Genere un planning automatique
  */
-export function generatePlanning(config, users, tasks) {
-  // Créer la grille vide
+export function generatePlanning(
+  config: PlanningConfig,
+  users: User[],
+  tasks: Task[]
+): GeneratedPlanning {
+  // Creer la grille vide
   const grid = createEmptyGrid(config, users)
 
   // Statistiques de placement
-  const stats = {
+  const stats: PlanningStats = {
     placed: [],
     failed: [],
     total: tasks.length,
   }
 
-  // Trier les tâches par priorité de placement
+  // Trier les taches par priorite de placement
   const sortedTasks = sortTasksByPriority(tasks)
 
-  // Étape 1: Placer les tâches quotidiennes récurrentes
+  // Etape 1: Placer les taches quotidiennes recurrentes
   const dailyTasks = sortedTasks.filter(t => t.recurrence === 'daily')
   placeDailyTasks(grid, dailyTasks, stats)
 
-  // Étape 2: Placer les tâches hebdomadaires récurrentes
+  // Etape 2: Placer les taches hebdomadaires recurrentes
   const weeklyTasks = sortedTasks.filter(t => t.recurrence === 'weekly')
   placeWeeklyTasks(grid, weeklyTasks, stats)
 
-  // Étape 3: Placer les tâches ponctuelles (once)
+  // Etape 3: Placer les taches ponctuelles (once)
   const onceTasks = sortedTasks.filter(t => t.recurrence === 'once')
   placeOnceTasks(grid, onceTasks, stats)
 
-  // Étape 4: Placer les tâches personnalisées (custom)
+  // Etape 4: Placer les taches personnalisees (custom)
   const customTasks = sortedTasks.filter(t => t.recurrence === 'custom')
   placeCustomTasks(grid, customTasks, stats)
 
-  // Étape 5: Remplir avec les tâches flexibles
+  // Etape 5: Remplir avec les taches flexibles
   const flexibleTasks = sortedTasks.filter(t => t.type === 'flexible')
   fillWithFlexible(grid, flexibleTasks, stats)
 
@@ -61,32 +120,32 @@ export function generatePlanning(config, users, tasks) {
 }
 
 /**
- * Trie les tâches par priorité de placement
+ * Trie les taches par priorite de placement
  */
-function sortTasksByPriority(tasks) {
+function sortTasksByPriority(tasks: Task[]): Task[] {
   return [...tasks].sort((a, b) => {
-    // Priorité: URGENT(1), HIGH(2), NORMAL(3), LOW(4)
+    // Priorite: URGENT(1), HIGH(2), NORMAL(3), LOW(4)
     const priorityDiff = (a.priority || PRIORITIES.NORMAL) - (b.priority || PRIORITIES.NORMAL)
     if (priorityDiff !== 0) return priorityDiff
 
-    // À priorité égale, tâches common en premier
+    // A priorite egale, taches common en premier
     if (a.type === 'common' && b.type !== 'common') return -1
     if (b.type === 'common' && a.type !== 'common') return 1
 
-    // Ensuite par durée décroissante (les plus longues d'abord)
+    // Ensuite par duree decroissante (les plus longues d'abord)
     return (b.duration || DEFAULT_DURATIONS.SHORT) - (a.duration || DEFAULT_DURATIONS.SHORT)
   })
 }
 
 /**
- * Place les tâches quotidiennes récurrentes
+ * Place les taches quotidiennes recurrentes
  */
-function placeDailyTasks(grid, tasks, stats) {
+function placeDailyTasks(grid: Grid, tasks: Task[], stats: PlanningStats): void {
   for (const task of tasks) {
     // Pour chaque jour de la grille
     for (let dayIndex = 0; dayIndex < grid.days.length; dayIndex++) {
       const placement = findAvailableSlot(grid, task, {
-        preferredTime: task.preferredTime || 'any',
+        preferredTime: (task.preferredTime || 'any') as TimePreference,
         preferredDays: task.preferredDays || [],
         startDayIndex: dayIndex,
       })
@@ -104,17 +163,17 @@ function placeDailyTasks(grid, tasks, stats) {
 }
 
 /**
- * Place les tâches hebdomadaires récurrentes
+ * Place les taches hebdomadaires recurrentes
  */
-function placeWeeklyTasks(grid, tasks, stats) {
+function placeWeeklyTasks(grid: Grid, tasks: Task[], stats: PlanningStats): void {
   for (const task of tasks) {
-    // Si des jours préférés sont spécifiés, utiliser ceux-ci
+    // Si des jours preferes sont specifies, utiliser ceux-ci
     const preferredDays = task.preferredDays && task.preferredDays.length > 0
       ? task.preferredDays
       : []
 
     const placement = findAvailableSlot(grid, task, {
-      preferredTime: task.preferredTime || 'any',
+      preferredTime: (task.preferredTime || 'any') as TimePreference,
       preferredDays,
     })
 
@@ -126,18 +185,18 @@ function placeWeeklyTasks(grid, tasks, stats) {
         slot: placement.slot,
       })
     } else {
-      stats.failed.push({ task, reason: 'Aucun créneau disponible' })
+      stats.failed.push({ task, reason: 'Aucun creneau disponible' })
     }
   }
 }
 
 /**
- * Place les tâches ponctuelles
+ * Place les taches ponctuelles
  */
-function placeOnceTasks(grid, tasks, stats) {
+function placeOnceTasks(grid: Grid, tasks: Task[], stats: PlanningStats): void {
   for (const task of tasks) {
     const placement = findAvailableSlot(grid, task, {
-      preferredTime: task.preferredTime || 'any',
+      preferredTime: (task.preferredTime || 'any') as TimePreference,
       preferredDays: task.preferredDays || [],
     })
 
@@ -149,21 +208,21 @@ function placeOnceTasks(grid, tasks, stats) {
         slot: placement.slot,
       })
     } else {
-      stats.failed.push({ task, reason: 'Aucun créneau disponible' })
+      stats.failed.push({ task, reason: 'Aucun creneau disponible' })
     }
   }
 }
 
 /**
- * Place les tâches personnalisées
+ * Place les taches personnalisees
  */
-function placeCustomTasks(grid, tasks, stats) {
+function placeCustomTasks(grid: Grid, tasks: Task[], stats: PlanningStats): void {
   for (const task of tasks) {
-    // Pour les tâches custom avec jours préférés, placer sur ces jours
+    // Pour les taches custom avec jours preferes, placer sur ces jours
     if (task.preferredDays && task.preferredDays.length > 0) {
       for (const preferredDay of task.preferredDays) {
         const placement = findAvailableSlot(grid, task, {
-          preferredTime: task.preferredTime || 'any',
+          preferredTime: (task.preferredTime || 'any') as TimePreference,
           preferredDays: [preferredDay],
         })
 
@@ -177,9 +236,9 @@ function placeCustomTasks(grid, tasks, stats) {
         }
       }
     } else {
-      // Sinon, placer comme une tâche once
+      // Sinon, placer comme une tache once
       const placement = findAvailableSlot(grid, task, {
-        preferredTime: task.preferredTime || 'any',
+        preferredTime: (task.preferredTime || 'any') as TimePreference,
       })
 
       if (placement) {
@@ -190,20 +249,20 @@ function placeCustomTasks(grid, tasks, stats) {
           slot: placement.slot,
         })
       } else {
-        stats.failed.push({ task, reason: 'Aucun créneau disponible' })
+        stats.failed.push({ task, reason: 'Aucun creneau disponible' })
       }
     }
   }
 }
 
 /**
- * Remplit les créneaux vides avec les tâches flexibles
+ * Remplit les creneaux vides avec les taches flexibles
  */
-function fillWithFlexible(grid, tasks, stats) {
+function fillWithFlexible(grid: Grid, tasks: Task[], stats: PlanningStats): void {
   if (tasks.length === 0) return
 
-  // Trouver la tâche flexible par utilisateur
-  const flexibleByUser = {}
+  // Trouver la tache flexible par utilisateur
+  const flexibleByUser: Record<string, Task> = {}
   for (const task of tasks) {
     const userId = task.assignedTo || 'common'
     if (!flexibleByUser[userId]) {
@@ -211,7 +270,7 @@ function fillWithFlexible(grid, tasks, stats) {
     }
   }
 
-  // Parcourir tous les créneaux vides et les remplir
+  // Parcourir tous les creneaux vides et les remplir
   for (const day of grid.days) {
     for (const [columnId, column] of Object.entries(day.columns)) {
       if (columnId === 'common') continue // Skip common column for flexible
@@ -240,9 +299,9 @@ function fillWithFlexible(grid, tasks, stats) {
 /**
  * Convertit la grille interne en format de sortie
  */
-function convertGridToPlanning(grid) {
+function convertGridToPlanning(grid: Grid): PlanningWeek[] {
   // Grouper par semaine
-  const weekMap = new Map()
+  const weekMap = new Map<number, PlanningWeek>()
 
   for (const day of grid.days) {
     const weekNum = day.weekNumber
@@ -256,10 +315,10 @@ function convertGridToPlanning(grid) {
       })
     }
 
-    const week = weekMap.get(weekNum)
+    const week = weekMap.get(weekNum)!
 
-    // Convertir les créneaux du jour
-    const daySlots = []
+    // Convertir les creneaux du jour
+    const daySlots: WeekSlot[] = []
 
     for (const [columnId, column] of Object.entries(day.columns)) {
       for (const slot of column.slots) {
@@ -280,6 +339,7 @@ function convertGridToPlanning(grid) {
     week.days.push({
       date: day.date,
       dayName: day.dayName,
+      weekNumber: day.weekNumber,
       columns: day.columns,
     })
   }
@@ -289,9 +349,9 @@ function convertGridToPlanning(grid) {
 }
 
 /**
- * Exporte le planning généré
+ * Exporte le planning genere
  */
-export function exportPlanning(planning) {
+export function exportPlanning(planning: PlanningWeek[]): ExportedPlanning {
   return {
     generatedAt: new Date().toISOString(),
     weeks: planning.map(week => ({

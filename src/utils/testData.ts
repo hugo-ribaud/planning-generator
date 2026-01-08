@@ -1,8 +1,50 @@
 /**
- * Données de test pour le planning familial
+ * Donnees de test pour le planning familial
  */
 
-export const TEST_USERS = [
+import type { User, Task, Milestone, PlanningConfig, MilestoneStatus } from '../types'
+
+interface TestUser extends Omit<User, 'daysOff'> {
+  daysOff?: string[]
+}
+
+interface TestTask {
+  id: string
+  name: string
+  duration: number
+  frequency: string
+  assignedTo: string
+  priority: string
+  preferredTime?: string
+  preferredDays?: string[]
+}
+
+interface TestMilestone {
+  id: string
+  title: string
+  description: string
+  status: MilestoneStatus
+  progress: number
+  assigned_to: string
+  target_date: string
+  is_focus: boolean
+  created_at: string
+  updated_at: string
+}
+
+interface TestConfig {
+  id: string
+  periodType: string
+  periodCount: number
+  workStart: string
+  workEnd: string
+  lunchStart: string
+  lunchEnd: string
+  slotDuration: number
+  daysOff: string[]
+}
+
+export const TEST_USERS: TestUser[] = [
   {
     id: 'user-hugo',
     name: 'Hugo',
@@ -15,11 +57,11 @@ export const TEST_USERS = [
   },
 ]
 
-export const TEST_TASKS = [
-  // Tâches quotidiennes
+export const TEST_TASKS: TestTask[] = [
+  // Taches quotidiennes
   {
     id: 'task-1',
-    name: 'Préparer le petit-déjeuner',
+    name: 'Preparer le petit-dejeuner',
     duration: 30,
     frequency: 'daily',
     assignedTo: 'common',
@@ -36,7 +78,7 @@ export const TEST_TASKS = [
   },
   {
     id: 'task-3',
-    name: 'Préparer le dîner',
+    name: 'Preparer le diner',
     duration: 60,
     frequency: 'daily',
     assignedTo: 'common',
@@ -45,7 +87,7 @@ export const TEST_TASKS = [
   },
   {
     id: 'task-4',
-    name: 'Méditation',
+    name: 'Meditation',
     duration: 20,
     frequency: 'daily',
     assignedTo: 'user-delphine',
@@ -53,7 +95,7 @@ export const TEST_TASKS = [
     preferredTime: 'morning',
   },
 
-  // Tâches hebdomadaires
+  // Taches hebdomadaires
   {
     id: 'task-5',
     name: 'Courses alimentaires',
@@ -65,7 +107,7 @@ export const TEST_TASKS = [
   },
   {
     id: 'task-6',
-    name: 'Ménage salon',
+    name: 'Menage salon',
     duration: 45,
     frequency: 'weekly',
     assignedTo: 'user-hugo',
@@ -74,7 +116,7 @@ export const TEST_TASKS = [
   },
   {
     id: 'task-7',
-    name: 'Ménage cuisine',
+    name: 'Menage cuisine',
     duration: 45,
     frequency: 'weekly',
     assignedTo: 'user-delphine',
@@ -109,7 +151,7 @@ export const TEST_TASKS = [
     preferredDays: ['lundi', 'mercredi', 'vendredi'],
   },
 
-  // Tâches flexibles
+  // Taches flexibles
   {
     id: 'task-11',
     name: 'Lecture',
@@ -145,15 +187,15 @@ export const TEST_TASKS = [
   },
 ]
 
-// Helper pour générer des dates relatives
+// Helper pour generer des dates relatives
 const today = new Date()
-const addDays = (days) => {
+const addDaysToDate = (days: number): string => {
   const date = new Date(today)
   date.setDate(date.getDate() + days)
   return date.toISOString().split('T')[0]
 }
 
-export const TEST_MILESTONES = [
+export const TEST_MILESTONES: TestMilestone[] = [
   {
     id: 'milestone-1',
     title: 'Finir le projet Conversari',
@@ -161,19 +203,19 @@ export const TEST_MILESTONES = [
     status: 'in_progress',
     progress: 75,
     assigned_to: 'user-hugo',
-    target_date: addDays(5),
+    target_date: addDaysToDate(5),
     is_focus: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
   {
     id: 'milestone-2',
-    title: 'Organiser les vacances été',
-    description: 'Réserver hébergement et planifier activités',
+    title: 'Organiser les vacances ete',
+    description: 'Reserver hebergement et planifier activites',
     status: 'todo',
     progress: 10,
     assigned_to: 'user-delphine',
-    target_date: addDays(14),
+    target_date: addDaysToDate(14),
     is_focus: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -185,7 +227,7 @@ export const TEST_MILESTONES = [
     status: 'in_progress',
     progress: 40,
     assigned_to: 'common',
-    target_date: addDays(7),
+    target_date: addDaysToDate(7),
     is_focus: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -197,50 +239,50 @@ export const TEST_MILESTONES = [
     status: 'in_progress',
     progress: 60,
     assigned_to: 'user-hugo',
-    target_date: addDays(21),
+    target_date: addDaysToDate(21),
     is_focus: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
   {
     id: 'milestone-5',
-    title: 'Cours de poterie terminé',
-    description: 'Finir les 10 séances du cours',
+    title: 'Cours de poterie termine',
+    description: 'Finir les 10 seances du cours',
     status: 'in_progress',
     progress: 80,
     assigned_to: 'user-delphine',
-    target_date: addDays(3),
+    target_date: addDaysToDate(3),
     is_focus: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
   {
     id: 'milestone-6',
-    title: 'Réparer la clôture',
-    description: 'Remplacer les planches cassées côté jardin',
+    title: 'Reparer la cloture',
+    description: 'Remplacer les planches cassees cote jardin',
     status: 'todo',
     progress: 0,
     assigned_to: 'user-hugo',
-    target_date: addDays(-2), // En retard !
+    target_date: addDaysToDate(-2), // En retard !
     is_focus: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
   {
     id: 'milestone-7',
-    title: 'Déclarer les impôts',
-    description: 'Déclaration annuelle des revenus',
+    title: 'Declarer les impots',
+    description: 'Declaration annuelle des revenus',
     status: 'done',
     progress: 100,
     assigned_to: 'common',
-    target_date: addDays(-10),
+    target_date: addDaysToDate(-10),
     is_focus: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
 ]
 
-export const TEST_CONFIG = {
+export const TEST_CONFIG: TestConfig = {
   id: 'config-test',
   periodType: 'week',
   periodCount: 2,
@@ -252,21 +294,28 @@ export const TEST_CONFIG = {
   daysOff: ['dimanche'],
 }
 
+interface LoadTestDataCallbacks {
+  setUsers?: (fn: (prev: User[]) => User[]) => void
+  setTasks?: (tasks: TestTask[]) => void
+  setMilestones?: (milestones: TestMilestone[]) => void
+  setConfig?: (config: TestConfig) => void
+}
+
 /**
- * Charge les données de test dans l'application
+ * Charge les donnees de test dans l'application
  */
-export function loadTestData(callbacks) {
+export function loadTestData(callbacks: LoadTestDataCallbacks) {
   const { setUsers, setTasks, setMilestones, setConfig } = callbacks
 
   // Load users
   if (setUsers) {
-    TEST_USERS.forEach(user => setUsers(prev => {
+    setUsers((prev: User[]) => {
       // Replace default users
       if (prev.length <= 2 && prev.some(u => !u.name || u.name === '')) {
-        return TEST_USERS
+        return TEST_USERS as User[]
       }
       return prev
-    }))
+    })
   }
 
   // Load tasks
