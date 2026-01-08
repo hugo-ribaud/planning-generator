@@ -4,6 +4,7 @@
 
 import { generateDaySlots } from './timeUtils'
 import { getWeekDates, getMonthDates, getDayName, isDayOff, getWeekNumber } from './dateUtils'
+import { WORK_HOURS, DEFAULT_DURATIONS } from './constants'
 
 /**
  * Crée une grille vide pour le planning
@@ -86,7 +87,7 @@ export function findAvailableSlot(grid, task, options = {}) {
     startDayIndex = 0,
   } = options
 
-  const slotsNeeded = Math.ceil(task.duration / grid.days[0]?.columns.common.slots[0]?.duration || 30)
+  const slotsNeeded = Math.ceil(task.duration / grid.days[0]?.columns.common.slots[0]?.duration || DEFAULT_DURATIONS.SHORT)
 
   // Déterminer la colonne cible
   const targetColumn = task.assignedTo === 'common' ? 'common' : task.assignedTo
@@ -155,11 +156,11 @@ function matchesTimePreference(startTime, preference) {
 
   switch (preference) {
     case 'morning':
-      return hour >= 9 && hour < 12
+      return hour >= WORK_HOURS.MORNING_START && hour < WORK_HOURS.LUNCH_START
     case 'afternoon':
-      return hour >= 14 && hour < 17
+      return hour >= WORK_HOURS.AFTERNOON_START && hour < WORK_HOURS.EVENING_END
     case 'evening':
-      return hour >= 17
+      return hour >= WORK_HOURS.EVENING_END
     default:
       return true
   }

@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react'
 import { DEFAULT_CONFIG, DEFAULT_USERS } from '../data/defaults'
+import { generateId } from '../utils/idGenerator'
+import { PRIORITIES, DEFAULT_DURATIONS } from '../utils/constants'
 
 // Get current Monday
 function getCurrentMonday() {
@@ -21,8 +23,8 @@ const initialConfig = {
   slotDuration: DEFAULT_CONFIG.slot_duration,
 }
 
-const initialUsers = DEFAULT_USERS.map((user, index) => ({
-  id: `temp-${index}`,
+const initialUsers = DEFAULT_USERS.map((user) => ({
+  id: generateId('user'),
   ...user,
 }))
 
@@ -59,7 +61,7 @@ export function usePlanningConfig() {
   // Users handlers
   const addUser = useCallback(() => {
     const newUser = {
-      id: `temp-${Date.now()}`,
+      id: generateId('user'),
       name: '',
       color: '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0'),
       days_off: [],
@@ -81,13 +83,13 @@ export function usePlanningConfig() {
   // Tasks handlers
   const addTask = useCallback(() => {
     const newTask = {
-      id: `temp-${Date.now()}`,
+      id: generateId('task'),
       name: '',
       assignedTo: null,
       type: 'solo',
       recurrence: 'weekly',
-      duration: 60,
-      priority: 2,
+      duration: DEFAULT_DURATIONS.MEDIUM,
+      priority: PRIORITIES.HIGH,
       color: '',
       preferredDays: [],
       preferredTime: 'any',
