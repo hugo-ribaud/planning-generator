@@ -130,8 +130,8 @@ export function useDashboardStats(
     }
 
     // Planning stats (if generated)
-    const planningStats: PlanningStats | null = planning ? {
-      totalSlots: planning.reduce((acc, week) => acc + week.slots.length, 0),
+    const planningStats: PlanningStats | null = planning && Array.isArray(planning) ? {
+      totalSlots: planning.reduce((acc, week) => acc + (week.slots?.length || 0), 0),
       weeksCount: planning.length,
     } : null
 
