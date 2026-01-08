@@ -11,11 +11,12 @@ import { PlanningView } from '../components/planning'
 import { MilestoneList } from '../components/milestones'
 import { Dashboard } from '../components/dashboard'
 import { Button, SyncStatus, ToastContainer } from '../components/ui'
-import { usePlanningConfig, usePlanningGenerator, useMilestones, useRealtimeSync, useToasts } from '../hooks'
+import { usePlanningConfig, usePlanningGenerator, useMilestones, useRealtimeSync, useToasts, useShoppingList } from '../hooks'
 import { usePlannings } from '../hooks/usePlannings'
 import { useAuth } from '../contexts/AuthContext'
 import { TEST_USERS, TEST_TASKS, TEST_MILESTONES } from '../utils/testData'
 import { PrintablePlanning } from '../components/printable/magazine'
+import { ShoppingListView } from '../components/shopping'
 
 // Auto-save delay in ms (30 seconds)
 const AUTOSAVE_DELAY = 30000
@@ -67,6 +68,25 @@ export function PlanningEditorPage() {
     getFocusMilestone,
     loadMilestones,
   } = useMilestones()
+
+  // Shopping list
+  const {
+    shoppingList,
+    updateTitle: updateShoppingTitle,
+    addCategory,
+    updateCategory,
+    removeCategory,
+    addItem,
+    updateItem,
+    removeItem,
+    toggleItem,
+    assignItem,
+    clearCheckedItems,
+    uncheckAllItems,
+    resetToDefault: resetShoppingList,
+    loadShoppingList,
+    getStats: getShoppingStats,
+  } = useShoppingList()
 
   // Local state
   const [showPlanning, setShowPlanning] = useState(false)
@@ -130,6 +150,7 @@ export function PlanningEditorPage() {
           if (data.users_data) loadUsers(data.users_data)
           if (data.tasks_data) loadTasks(data.tasks_data)
           if (data.milestones_data) loadMilestones(data.milestones_data)
+          if (data.shopping_list) loadShoppingList(data.shopping_list)
           if (data.planning_result) {
             loadPlanning(data.planning_result)
             setShowPlanning(true)
@@ -148,7 +169,7 @@ export function PlanningEditorPage() {
     if (currentPlanningId) {
       setHasUnsavedChanges(true)
     }
-  }, [config, users, tasks, milestones, planning, planningName])
+  }, [config, users, tasks, milestones, planning, planningName, shoppingList])
 
   // Auto-save effect
   useEffect(() => {
@@ -180,6 +201,7 @@ export function PlanningEditorPage() {
       tasks,
       milestones,
       planningResult: planning,
+      shoppingList,
     }
 
     try {
@@ -392,6 +414,26 @@ export function PlanningEditorPage() {
             onUpdate={updateMilestone}
             onDelete={removeMilestone}
             onToggleFocus={toggleFocus}
+          />
+
+          {/* Shopping List */}
+          <ShoppingListView
+            shoppingList={shoppingList}
+            users={users}
+            actions={{
+              addCategory,
+              updateCategory,
+              removeCategory,
+              addItem,
+              updateItem,
+              removeItem,
+              toggleItem,
+              assignItem,
+              clearCheckedItems,
+              uncheckAllItems,
+              resetToDefault: resetShoppingList,
+              getStats: getShoppingStats,
+            }}
           />
 
           {/* Error message */}
