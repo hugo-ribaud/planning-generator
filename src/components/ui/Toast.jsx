@@ -39,18 +39,21 @@ export function Toast({ message, type = 'info', duration = 3000, onClose }) {
 
   return (
     <motion.div
+      role="alert"
+      aria-live="polite"
       initial={{ opacity: 0, y: -20, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.9 }}
       className={`flex items-center gap-2 px-4 py-3 rounded-lg border shadow-lg ${config.className}`}
     >
-      <span>{config.icon}</span>
+      <span aria-hidden="true">{config.icon}</span>
       <span className="flex-1 text-sm font-medium">{message}</span>
       <button
         onClick={onClose}
-        className="ml-2 opacity-60 hover:opacity-100 transition-opacity"
+        aria-label="Fermer la notification"
+        className="ml-2 opacity-60 hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-current focus:ring-offset-1 rounded"
       >
-        ✕
+        <span aria-hidden="true">✕</span>
       </button>
     </motion.div>
   )
@@ -61,7 +64,10 @@ export function Toast({ message, type = 'info', duration = 3000, onClose }) {
  */
 export function ToastContainer({ toasts, onRemove }) {
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm">
+    <div
+      className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm"
+      aria-label="Notifications"
+    >
       <AnimatePresence>
         {toasts.map((toast) => (
           <Toast

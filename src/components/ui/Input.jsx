@@ -1,3 +1,5 @@
+import { useId } from 'react'
+
 export function Input({
   label,
   type = 'text',
@@ -8,23 +10,31 @@ export function Input({
   required = false,
   disabled = false,
   className = '',
+  id: customId,
   ...props
 }) {
+  const generatedId = useId()
+  const id = customId || generatedId
+  const errorId = `${id}-error`
+
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
       {label && (
-        <label className="text-sm font-medium text-gray-700">
+        <label htmlFor={id} className="text-sm font-medium text-gray-700">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       <input
+        id={id}
         type={type}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
         disabled={disabled}
         required={required}
+        aria-invalid={error ? 'true' : undefined}
+        aria-describedby={error ? errorId : undefined}
         className={`
           px-3 py-2 rounded-lg border transition-colors
           ${error
@@ -37,7 +47,9 @@ export function Input({
         {...props}
       />
       {error && (
-        <span className="text-sm text-red-500">{error}</span>
+        <span id={errorId} className="text-sm text-red-500" role="alert">
+          {error}
+        </span>
       )}
     </div>
   )
