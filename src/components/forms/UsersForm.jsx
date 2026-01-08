@@ -17,6 +17,8 @@ function UserCard({ user, onUpdate, onRemove, canRemove }) {
     onUpdate(user.id, 'days_off', newDays)
   }
 
+  const userName = user.name || 'Sans nom'
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -31,9 +33,10 @@ function UserCard({ user, onUpdate, onRemove, canRemove }) {
             type="color"
             value={user.color}
             onChange={handleChange('color')}
+            aria-label={`Couleur de ${userName}`}
             className="w-10 h-10 rounded-lg cursor-pointer border-2 border-white shadow-sm"
           />
-          <span className="text-xs text-gray-500">Couleur</span>
+          <span className="text-xs text-gray-500" aria-hidden="true">Couleur</span>
         </div>
 
         {/* User info */}
@@ -46,29 +49,34 @@ function UserCard({ user, onUpdate, onRemove, canRemove }) {
           />
 
           {/* Days off */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
+          <fieldset>
+            <legend className="text-sm font-medium text-gray-700 mb-2">
               Jours off
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {DAYS_OF_WEEK.map((day) => (
-                <button
-                  key={day.value}
-                  type="button"
-                  onClick={() => toggleDayOff(day.value)}
-                  className={`
-                    px-3 py-1 text-sm rounded-full transition-colors
-                    ${(user.days_off || []).includes(day.value)
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                    }
-                  `}
-                >
-                  {day.label.slice(0, 3)}
-                </button>
-              ))}
+            </legend>
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Sélection des jours off">
+              {DAYS_OF_WEEK.map((day) => {
+                const isSelected = (user.days_off || []).includes(day.value)
+                return (
+                  <button
+                    key={day.value}
+                    type="button"
+                    onClick={() => toggleDayOff(day.value)}
+                    aria-pressed={isSelected}
+                    className={`
+                      px-3 py-1 text-sm rounded-full transition-colors
+                      focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1
+                      ${isSelected
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }
+                    `}
+                  >
+                    {day.label.slice(0, 3)}
+                  </button>
+                )
+              })}
             </div>
-          </div>
+          </fieldset>
 
           {/* Constraints */}
           <Input
@@ -85,9 +93,10 @@ function UserCard({ user, onUpdate, onRemove, canRemove }) {
             variant="ghost"
             size="sm"
             onClick={() => onRemove(user.id)}
+            aria-label={`Supprimer l'utilisateur ${userName}`}
             className="text-red-500 hover:text-red-700 hover:bg-red-50"
           >
-            ✕
+            <span aria-hidden="true">✕</span>
           </Button>
         )}
       </div>

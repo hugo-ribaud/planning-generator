@@ -1,3 +1,5 @@
+import { useId } from 'react'
+
 export function Select({
   label,
   value,
@@ -8,21 +10,29 @@ export function Select({
   required = false,
   disabled = false,
   className = '',
+  id: customId,
   ...props
 }) {
+  const generatedId = useId()
+  const id = customId || generatedId
+  const errorId = `${id}-error`
+
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
       {label && (
-        <label className="text-sm font-medium text-gray-700">
+        <label htmlFor={id} className="text-sm font-medium text-gray-700">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       <select
+        id={id}
         value={value}
         onChange={onChange}
         disabled={disabled}
         required={required}
+        aria-invalid={error ? 'true' : undefined}
+        aria-describedby={error ? errorId : undefined}
         className={`
           px-3 py-2 rounded-lg border transition-colors appearance-none
           bg-white bg-no-repeat bg-right
@@ -53,7 +63,9 @@ export function Select({
         ))}
       </select>
       {error && (
-        <span className="text-sm text-red-500">{error}</span>
+        <span id={errorId} className="text-sm text-red-500" role="alert">
+          {error}
+        </span>
       )}
     </div>
   )

@@ -42,6 +42,8 @@ function TaskCard({ task, users, onUpdate, onRemove }) {
     ...users.map(u => ({ value: u.id, label: u.name || 'Sans nom' }))
   ]
 
+  const taskName = task.name || 'Sans nom'
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -56,6 +58,7 @@ function TaskCard({ task, users, onUpdate, onRemove }) {
             type="color"
             value={task.color || '#6B7280'}
             onChange={handleChange('color')}
+            aria-label={`Couleur de la tâche ${taskName}`}
             className="w-8 h-8 rounded cursor-pointer border-2 border-white shadow-sm mt-1"
           />
           <Input
@@ -69,9 +72,10 @@ function TaskCard({ task, users, onUpdate, onRemove }) {
             variant="ghost"
             size="sm"
             onClick={() => onRemove(task.id)}
+            aria-label={`Supprimer la tâche ${taskName}`}
             className="text-red-500 hover:text-red-700 hover:bg-red-50 mt-6"
           >
-            ✕
+            <span aria-hidden="true">✕</span>
           </Button>
         </div>
 
@@ -121,29 +125,34 @@ function TaskCard({ task, users, onUpdate, onRemove }) {
         </div>
 
         {/* Preferred days */}
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-2 block">
+        <fieldset>
+          <legend className="text-sm font-medium text-gray-700 mb-2">
             Jours préférés (optionnel)
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {DAYS_OF_WEEK.map((day) => (
-              <button
-                key={day.value}
-                type="button"
-                onClick={() => togglePreferredDay(day.value)}
-                className={`
-                  px-3 py-1 text-sm rounded-full transition-colors
-                  ${(task.preferredDays || []).includes(day.value)
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                  }
-                `}
-              >
-                {day.label.slice(0, 3)}
-              </button>
-            ))}
+          </legend>
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Sélection des jours préférés">
+            {DAYS_OF_WEEK.map((day) => {
+              const isSelected = (task.preferredDays || []).includes(day.value)
+              return (
+                <button
+                  key={day.value}
+                  type="button"
+                  onClick={() => togglePreferredDay(day.value)}
+                  aria-pressed={isSelected}
+                  className={`
+                    px-3 py-1 text-sm rounded-full transition-colors
+                    focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1
+                    ${isSelected
+                      ? 'bg-primary text-white'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                    }
+                  `}
+                >
+                  {day.label.slice(0, 3)}
+                </button>
+              )
+            })}
           </div>
-        </div>
+        </fieldset>
       </div>
     </motion.div>
   )
