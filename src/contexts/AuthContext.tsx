@@ -81,33 +81,23 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
 
   // Initialize auth state
   useEffect(() => {
-    // Get initial session
-    const initAuth = async (): Promise<void> => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession()
-        if (error) throw error
+    let isInitialized = false
 
-        setUser(session?.user ?? null)
-        if (session?.user) {
-          await fetchProfile(session.user.id)
-        }
-      } catch (err) {
-        console.error('Auth init error:', err)
-        setError(err instanceof Error ? err.message : 'Authentication error')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    initAuth()
-
-    // Listen for auth changes
+    // Listen for auth changes - this is the primary way to get auth state
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        // Set user immediately (sync operation)
         setUser(session?.user ?? null)
 
+        // Mark as initialized and stop loading BEFORE async operations
+        if (!isInitialized) {
+          isInitialized = true
+          setLoading(false)
+        }
+
+        // Fetch profile async (non-blocking for initial load)
         if (session?.user) {
-          await fetchProfile(session.user.id)
+          fetchProfile(session.user.id)
         } else {
           setProfile(null)
         }
@@ -119,7 +109,19 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
       }
     )
 
-    return () => subscription?.unsubscribe()
+    // Fallback: if no auth state change happens within 3 seconds, stop loading
+    // This handles edge cases where the auth state is null and no event fires
+    const timeout = setTimeout(() => {
+      if (!isInitialized) {
+        isInitialized = true
+        setLoading(false)
+      }
+    }, 3000)
+
+    return () => {
+      subscription?.unsubscribe()
+      clearTimeout(timeout)
+    }
   }, [fetchProfile])
 
   // Sign in with email and password
