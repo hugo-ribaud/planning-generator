@@ -6,12 +6,12 @@
 import { useState, useCallback, useEffect, useRef, type ChangeEvent } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
-import { GeneralConfigForm, UsersForm, TasksForm } from '../components/forms'
+import { GeneralConfigForm, UsersForm, TasksForm, AIPromptModal } from '../components/forms'
 import { PlanningView } from '../components/planning'
 import { MilestoneList } from '../components/milestones'
 import { Dashboard } from '../components/dashboard'
 import { Button, SyncStatus, ToastContainer, MobileNav, NavLink } from '../components/ui'
-import { usePlanningConfig, usePlanningGenerator, useMilestones, useRealtimeSync, useToasts, useShoppingList, detectChangedFields, getFieldLabel } from '../hooks'
+import { usePlanningConfig, usePlanningGenerator, useMilestones, useRealtimeSync, useToasts, useShoppingList, detectChangedFields, getFieldLabel, type TransformedPlanningData } from '../hooks'
 import { usePlannings } from '../hooks/usePlannings'
 import { useAuth } from '../contexts/AuthContext'
 import { TEST_USERS, TEST_TASKS, TEST_MILESTONES } from '../utils/testData'
@@ -125,6 +125,7 @@ export function PlanningEditorPage(): JSX.Element {
   // Local state
   const [showPlanning, setShowPlanning] = useState(false)
   const [showPrintable, setShowPrintable] = useState(false)
+  const [showAIModal, setShowAIModal] = useState(false)
   const [planningName, setPlanningName] = useState('Planning sans titre')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
@@ -347,6 +348,22 @@ export function PlanningEditorPage(): JSX.Element {
     loadMilestones(TEST_MILESTONES)
     toast.success('Donnees de test chargees (Hugo & Delphine)')
   }, [loadUsers, loadTasks, loadMilestones, toast])
+
+  // Apply AI-generated data
+  const handleApplyAIData = useCallback((data: TransformedPlanningData): void => {
+    loadConfig(data.config)
+    loadUsers(data.users)
+    loadTasks(data.tasks)
+    loadMilestones(data.milestones)
+    if (data.shoppingList) {
+      loadShoppingList(data.shoppingList)
+    }
+    if (data.config.name) {
+      setPlanningName(data.config.name)
+    }
+    setHasUnsavedChanges(true)
+    toast.success('Planning genere par IA applique')
+  }, [loadConfig, loadUsers, loadTasks, loadMilestones, loadShoppingList, toast])
 
   // Generate planning
   const handleGenerate = (): void => {
@@ -660,15 +677,30 @@ export function PlanningEditorPage(): JSX.Element {
             className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 pt-4"
           >
             {!showPlanning ? (
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={handleGenerate}
-                disabled={users.some(u => !u.name) || tasks.length === 0 || isGenerating}
-                className="w-full sm:w-auto touch-target"
-              >
-                {isGenerating ? 'Generation...' : 'Generer le Planning'}
-              </Button>
+              <>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  onClick={() => setShowAIModal(true)}
+                  className="w-full sm:w-auto touch-target group"
+                >
+                  <span className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-violet-500 group-hover:text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    </svg>
+                    Generer avec IA
+                  </span>
+                </Button>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={handleGenerate}
+                  disabled={users.some(u => !u.name) || tasks.length === 0 || isGenerating}
+                  className="w-full sm:w-auto touch-target"
+                >
+                  {isGenerating ? 'Generation...' : 'Generer le Planning'}
+                </Button>
+              </>
             ) : (
               <>
                 <Button
@@ -708,6 +740,13 @@ export function PlanningEditorPage(): JSX.Element {
             <span>{milestones.length} objectif{milestones.length > 1 ? 's' : ''}</span>
           </div>
         </motion.div>
+
+        {/* AI Prompt Modal */}
+        <AIPromptModal
+          isOpen={showAIModal}
+          onClose={() => setShowAIModal(false)}
+          onApply={handleApplyAIData}
+        />
       </main>
     </div>
   )
