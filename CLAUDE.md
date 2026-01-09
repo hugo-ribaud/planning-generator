@@ -59,6 +59,8 @@ Key concepts:
 | `useMilestones` | Goal tracking with focus feature |
 | `useRealtimeSync` | Supabase realtime subscriptions |
 | `useToasts` | Toast notification system |
+| `useAIGenerator` | AI-powered planning generation via Claude API |
+| `useShoppingList` | Shopping list management with categories |
 
 ### Database Schema
 
@@ -100,3 +102,72 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
 - JSDoc typedefs in `src/types/index.js` for data structures
 - Hooks export via barrel files (`index.js`)
 - Animation imports from `motion/react` (not `framer-motion`)
+
+## AI Planning Generator
+
+### Overview
+
+The app supports AI-powered planning generation via Claude API, allowing users to describe their planning needs in natural language and receive structured data.
+
+### Architecture
+
+```
+Frontend (AIPromptModal)
+    ↓ prompt
+Supabase Edge Function (generate-planning)
+    ↓ proxied request
+Claude API (claude-sonnet-4)
+    ↓ JSON response
+aiGenerator.ts (transform)
+    ↓ structured data
+usePlanningConfig (bulk load)
+```
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `supabase/functions/generate-planning/index.ts` | Edge Function proxy to Claude API |
+| `src/services/aiGenerator.ts` | Client + data transformation |
+| `src/hooks/useAIGenerator.ts` | React hook for generation state |
+| `src/components/forms/AIPromptModal.tsx` | Modal UI for prompt input |
+| `src/components/forms/AIPromptPreview.tsx` | Preview generated data before applying |
+
+### Element Type Distinction
+
+The AI distinguishes 4 types of elements:
+
+| Type | Description | Example |
+|------|-------------|---------|
+| **Tasks** | Schedulable activities with duration | Ménage, cuisine, sport |
+| **Shopping List** | Items to purchase (NOT tasks!) | lait, pain, fromage |
+| **Milestones** | Long-term goals | "Maison bien rangée" |
+| **Users** | People to schedule | Hugo, Delphine |
+
+### Shopping List Categories
+
+The AI uses these category slugs mapped to French names:
+
+| Slug | Display Name | Icon |
+|------|-------------|------|
+| `fruits_legumes` | Fruits & Légumes | 🥬 |
+| `viandes_poissons` | Viandes & Poissons | 🥩 |
+| `produits_laitiers` | Produits Laitiers | 🧀 |
+| `boulangerie` | Boulangerie | 🥖 |
+| `epicerie` | Épicerie | 🥫 |
+| `hygiene_maison` | Hygiène & Maison | 🧴 |
+| `surgeles` | Surgelés | ❄️ |
+| `boissons` | Boissons | 🍷 |
+
+### Environment Variables
+
+```env
+ANTHROPIC_API_KEY=sk-ant-...  # Set in Supabase Secrets (never in frontend)
+```
+
+### Deployment
+
+```bash
+# Deploy Edge Function via Supabase MCP or CLI
+supabase functions deploy generate-planning
+```
