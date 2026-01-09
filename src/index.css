@@ -14,6 +14,154 @@ body {
   @apply bg-gray-50 text-gray-900 antialiased;
 }
 
+/* ================================
+   RESPONSIVE DESIGN UTILITIES
+   ================================ */
+
+/* Touch-friendly minimum target sizes (44px) */
+.touch-target {
+  @apply min-h-[44px] min-w-[44px];
+}
+
+/* Mobile-first container padding */
+.container-responsive {
+  @apply px-4 sm:px-6 lg:px-8;
+}
+
+/* Responsive text sizes */
+.text-responsive-xl {
+  @apply text-lg sm:text-xl lg:text-2xl;
+}
+
+.text-responsive-lg {
+  @apply text-base sm:text-lg lg:text-xl;
+}
+
+.text-responsive-base {
+  @apply text-sm sm:text-base;
+}
+
+.text-responsive-sm {
+  @apply text-xs sm:text-sm;
+}
+
+/* Mobile navigation overlay */
+.mobile-nav-overlay {
+  @apply fixed inset-0 bg-black/50 z-40 transition-opacity;
+}
+
+/* Mobile drawer */
+.mobile-drawer {
+  @apply fixed top-0 left-0 h-full w-[280px] max-w-[85vw] bg-white shadow-xl z-50;
+  @apply transform transition-transform duration-300 ease-out;
+}
+
+.mobile-drawer.closed {
+  @apply -translate-x-full;
+}
+
+.mobile-drawer.open {
+  @apply translate-x-0;
+}
+
+/* Hide on mobile, show on desktop */
+.desktop-only {
+  @apply hidden lg:flex;
+}
+
+/* Show on mobile, hide on desktop */
+.mobile-only {
+  @apply flex lg:hidden;
+}
+
+/* Responsive grid helpers */
+.grid-responsive-1-2 {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+.grid-responsive-1-2-3 {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+.grid-responsive-1-3 {
+  @apply grid grid-cols-1 lg:grid-cols-3 gap-4;
+}
+
+/* Safe area for mobile devices with notch */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Swipe container for horizontal scrolling on mobile */
+.swipe-container {
+  @apply overflow-x-auto snap-x snap-mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.swipe-container::-webkit-scrollbar {
+  display: none;
+}
+
+.swipe-item {
+  @apply snap-center shrink-0;
+}
+
+/* Mobile card styles */
+.card-mobile {
+  @apply p-4 sm:p-6;
+}
+
+/* Sticky header for mobile */
+.sticky-header {
+  @apply sticky top-0 z-30 bg-white border-b border-gray-200;
+}
+
+/* Bottom action bar for mobile */
+.bottom-action-bar {
+  @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-40;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+}
+
+/* Floating action button */
+.fab {
+  @apply fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg z-30;
+  @apply flex items-center justify-center;
+  @apply bg-primary text-white;
+  bottom: calc(1.5rem + env(safe-area-inset-bottom));
+}
+
+/* Responsive input sizing */
+.input-responsive {
+  @apply text-base sm:text-sm;
+  /* Prevent zoom on iOS */
+  font-size: 16px;
+}
+
+@media (min-width: 640px) {
+  .input-responsive {
+    font-size: 14px;
+  }
+}
+
+/* Day navigation dots for mobile planning view */
+.day-dots {
+  @apply flex justify-center gap-2 py-3;
+}
+
+.day-dot {
+  @apply w-2 h-2 rounded-full bg-gray-300 transition-colors;
+}
+
+.day-dot.active {
+  @apply bg-primary w-3;
+}
+
 /* Print styles */
 @media print {
   /* Hide non-printable elements */

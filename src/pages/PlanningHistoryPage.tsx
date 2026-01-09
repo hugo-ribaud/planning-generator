@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { useAuth } from '../contexts/AuthContext'
 import { usePlannings } from '../hooks/usePlannings'
-import { Button, Card } from '../components/ui'
+import { Button, Card, MobileNav, NavLink } from '../components/ui'
 import type { Planning, PlanningConfig } from '../types'
 
 // Filter options
@@ -67,6 +67,18 @@ function PlanningCard({ planning, onLoad, onDuplicate, onArchive, onDelete, onSh
   const tasksCount = planning.tasks_data?.length || 0
   const hasResult = !!planning.planning_result
 
+  // Handle touch/click to toggle actions on mobile
+  const handleCardClick = (e: MouseEvent): void => {
+    // On mobile, first tap shows actions, second tap opens
+    if (window.innerWidth < 768 && !showActions) {
+      e.preventDefault()
+      e.stopPropagation()
+      setShowActions(true)
+    } else if (!showActions) {
+      onLoad(planning.id)
+    }
+  }
+
   return (
     <motion.div
       layout
@@ -81,7 +93,7 @@ function PlanningCard({ planning, onLoad, onDuplicate, onArchive, onDelete, onSh
           ${planning.is_archived ? 'opacity-60' : ''}
         `}
         animate={false}
-        onClick={() => onLoad(planning.id)}
+        onClick={handleCardClick}
         onMouseEnter={() => setShowActions(true)}
         onMouseLeave={() => {
           setShowActions(false)
@@ -89,25 +101,25 @@ function PlanningCard({ planning, onLoad, onDuplicate, onArchive, onDelete, onSh
         }}
       >
         {/* Header */}
-        <div className="flex items-start justify-between mb-3">
+        <div className="flex items-start justify-between mb-2 sm:mb-3">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 truncate">
+            <h3 className="font-semibold text-gray-900 truncate text-sm sm:text-base">
               {planning.name}
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-xs sm:text-sm text-gray-500">
               {formatRelativeDate(planning.updated_at)}
             </p>
           </div>
 
           {/* Status badges */}
-          <div className="flex gap-1">
+          <div className="flex gap-1 shrink-0 ml-2">
             {planning.is_public && (
-              <span className="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">
+              <span className="px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs bg-green-100 text-green-700 rounded-full">
                 Partage
               </span>
             )}
             {planning.is_archived && (
-              <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">
+              <span className="px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs bg-gray-100 text-gray-600 rounded-full">
                 Archive
               </span>
             )}
@@ -115,7 +127,7 @@ function PlanningCard({ planning, onLoad, onDuplicate, onArchive, onDelete, onSh
         </div>
 
         {/* Stats */}
-        <div className="flex gap-4 text-sm text-gray-600 mb-3">
+        <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3">
           <span>{usersCount} utilisateur{usersCount > 1 ? 's' : ''}</span>
           <span>{tasksCount} tache{tasksCount > 1 ? 's' : ''}</span>
           {hasResult && (
@@ -125,7 +137,7 @@ function PlanningCard({ planning, onLoad, onDuplicate, onArchive, onDelete, onSh
 
         {/* Config summary */}
         {planning.config && (
-          <div className="text-xs text-gray-500">
+          <div className="text-[10px] sm:text-xs text-gray-500">
             {planning.config.startDate && (
               <span>
                 Du {new Date(planning.config.startDate).toLocaleDateString('fr-FR')}
@@ -135,72 +147,104 @@ function PlanningCard({ planning, onLoad, onDuplicate, onArchive, onDelete, onSh
           </div>
         )}
 
-        {/* Action buttons (on hover) */}
+        {/* Mobile: Quick action hint */}
+        <div className="md:hidden mt-3 pt-2 border-t border-gray-100 text-center">
+          <span className="text-xs text-gray-400">
+            {showActions ? 'Choisir une action' : 'Appuyer pour voir les actions'}
+          </span>
+        </div>
+
+        {/* Action buttons (on hover/tap) */}
         <AnimatePresence>
           {showActions && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-white/95 rounded-xl flex items-center justify-center gap-2 p-4"
+              className="absolute inset-0 bg-white/95 rounded-xl flex flex-col sm:flex-row items-center justify-center gap-2 p-3 sm:p-4"
               onClick={(e: MouseEvent) => e.stopPropagation()}
             >
               {confirmDelete ? (
-                <>
-                  <span className="text-sm text-red-600 mr-2">Confirmer ?</span>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => onDelete(planning.id)}
-                  >
-                    Oui, supprimer
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setConfirmDelete(false)}
-                  >
-                    Annuler
-                  </Button>
-                </>
+                <div className="flex flex-col sm:flex-row items-center gap-2">
+                  <span className="text-sm text-red-600 mb-2 sm:mb-0 sm:mr-2">Confirmer ?</span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => onDelete(planning.id)}
+                      className="touch-target"
+                    >
+                      Oui, supprimer
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setConfirmDelete(false)}
+                      className="touch-target"
+                    >
+                      Annuler
+                    </Button>
+                  </div>
+                </div>
               ) : (
                 <>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => onLoad(planning.id)}
+                  {/* Primary actions - always visible */}
+                  <div className="flex gap-2 mb-2 sm:mb-0">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => onLoad(planning.id)}
+                      className="touch-target"
+                    >
+                      Ouvrir
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => onDuplicate(planning.id)}
+                      className="touch-target"
+                    >
+                      Dupliquer
+                    </Button>
+                  </div>
+                  {/* Secondary actions */}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onShare(planning)}
+                      className="touch-target"
+                    >
+                      {planning.is_public ? 'Lien' : 'Partager'}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onArchive(planning.id, !planning.is_archived)}
+                      className="touch-target"
+                    >
+                      {planning.is_archived ? 'Restaurer' : 'Archiver'}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:bg-red-50 touch-target"
+                      onClick={() => setConfirmDelete(true)}
+                    >
+                      Supprimer
+                    </Button>
+                  </div>
+                  {/* Mobile: Close button */}
+                  <button
+                    type="button"
+                    className="md:hidden absolute top-2 right-2 p-2 text-gray-400 hover:text-gray-600"
+                    onClick={() => setShowActions(false)}
+                    aria-label="Fermer"
                   >
-                    Ouvrir
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => onDuplicate(planning.id)}
-                  >
-                    Dupliquer
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onShare(planning)}
-                  >
-                    {planning.is_public ? 'Lien' : 'Partager'}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onArchive(planning.id, !planning.is_archived)}
-                  >
-                    {planning.is_archived ? 'Restaurer' : 'Archiver'}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-600 hover:bg-red-50"
-                    onClick={() => setConfirmDelete(true)}
-                  >
-                    Supprimer
-                  </Button>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </>
               )}
             </motion.div>
@@ -420,8 +464,56 @@ export function PlanningHistoryPage(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      {/* Mobile Navigation */}
+      <MobileNav
+        title="Planning Familial"
+        subtitle={`Bonjour, ${displayName}`}
+        headerActions={
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleCreateNew}
+            className="touch-target text-xs sm:text-sm"
+          >
+            + Nouveau
+          </Button>
+        }
+      >
+        {/* Mobile menu content */}
+        <div className="space-y-2">
+          <NavLink
+            icon="+"
+            label="Nouveau planning"
+            onClick={handleCreateNew}
+          />
+          <div className="border-t border-gray-200 my-4" />
+          <p className="px-4 py-2 text-sm text-gray-500">Filtres</p>
+          {(Object.entries(FILTERS) as [FilterKey, string][]).map(([key, label]) => (
+            <NavLink
+              key={key}
+              icon={key === 'all' ? '📋' : key === 'active' ? '✅' : '📦'}
+              label={`${label} (${key === 'all' ? plannings.length : (plannings as PlanningWithMeta[]).filter(p =>
+                key === 'active' ? !p.is_archived : p.is_archived
+              ).length})`}
+              active={filter === key}
+              onClick={() => setFilter(key)}
+            />
+          ))}
+          <div className="border-t border-gray-200 my-4" />
+          <div className="px-4 py-2">
+            <p className="text-sm text-gray-500">Connecte en tant que</p>
+            <p className="font-medium text-gray-900">{displayName}</p>
+          </div>
+          <NavLink
+            icon="🚪"
+            label="Deconnexion"
+            onClick={handleSignOut}
+          />
+        </div>
+      </MobileNav>
+
+      {/* Desktop Header */}
+      <header className="hidden lg:block bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-gray-900">
@@ -444,15 +536,15 @@ export function PlanningHistoryPage(): JSX.Element {
       </header>
 
       {/* Main content */}
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        {/* Filters */}
-        <div className="flex gap-2 mb-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 lg:py-8">
+        {/* Filters - Desktop and Tablet */}
+        <div className="hidden sm:flex flex-wrap gap-2 mb-4 sm:mb-6">
           {(Object.entries(FILTERS) as [FilterKey, string][]).map(([key, label]) => (
             <button
               key={key}
               onClick={() => setFilter(key)}
               className={`
-                px-4 py-2 rounded-lg font-medium transition-colors
+                px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors touch-target
                 ${filter === key
                   ? 'bg-blue-600 text-white'
                   : 'bg-white text-gray-600 hover:bg-gray-50'
@@ -469,6 +561,34 @@ export function PlanningHistoryPage(): JSX.Element {
               )}
             </button>
           ))}
+        </div>
+
+        {/* Filters - Mobile horizontal scroll */}
+        <div className="sm:hidden overflow-x-auto -mx-4 px-4 mb-4">
+          <div className="flex gap-2 pb-2">
+            {(Object.entries(FILTERS) as [FilterKey, string][]).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setFilter(key)}
+                className={`
+                  px-3 py-2 rounded-lg font-medium transition-colors whitespace-nowrap touch-target text-sm
+                  ${filter === key
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }
+                `}
+              >
+                {label}
+                {key !== 'all' && (
+                  <span className="ml-1 text-xs opacity-70">
+                    ({(plannings as PlanningWithMeta[]).filter(p =>
+                      key === 'active' ? !p.is_archived : p.is_archived
+                    ).length})
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Error message */}

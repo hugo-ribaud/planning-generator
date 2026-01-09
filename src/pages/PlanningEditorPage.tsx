@@ -10,7 +10,7 @@ import { GeneralConfigForm, UsersForm, TasksForm } from '../components/forms'
 import { PlanningView } from '../components/planning'
 import { MilestoneList } from '../components/milestones'
 import { Dashboard } from '../components/dashboard'
-import { Button, SyncStatus, ToastContainer } from '../components/ui'
+import { Button, SyncStatus, ToastContainer, MobileNav, NavLink } from '../components/ui'
 import { usePlanningConfig, usePlanningGenerator, useMilestones, useRealtimeSync, useToasts, useShoppingList, detectChangedFields, getFieldLabel } from '../hooks'
 import { usePlannings } from '../hooks/usePlannings'
 import { useAuth } from '../contexts/AuthContext'
@@ -389,13 +389,63 @@ export function PlanningEditorPage(): JSX.Element {
       {/* Toast notifications */}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
 
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      {/* Mobile Navigation */}
+      <MobileNav
+        title={planningName || 'Planning'}
+        subtitle={hasUnsavedChanges ? 'Non sauvegarde' : lastSaved ? `Sauvegarde ${lastSaved.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}` : undefined}
+        headerActions={
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleSave(false)}
+            className="touch-target"
+            aria-label="Sauvegarder"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+          </Button>
+        }
+      >
+        {/* Mobile menu content */}
+        <div className="space-y-2">
+          <NavLink
+            icon="←"
+            label="Retour a l'historique"
+            onClick={() => navigate('/history')}
+          />
+          <NavLink
+            icon="💾"
+            label="Sauvegarder"
+            onClick={() => handleSave(false)}
+          />
+          {(tasks.length > 0 || milestones.length > 0) && (
+            <NavLink
+              icon="🖨"
+              label="Version imprimable"
+              onClick={() => setShowPrintable(true)}
+            />
+          )}
+          <div className="border-t border-gray-200 my-4" />
+          <div className="px-4 py-2">
+            <p className="text-sm text-gray-500">Connecte en tant que</p>
+            <p className="font-medium text-gray-900">{displayName}</p>
+          </div>
+          <NavLink
+            icon="🚪"
+            label="Deconnexion"
+            onClick={handleSignOut}
+          />
+        </div>
+      </MobileNav>
+
+      {/* Desktop Header */}
+      <header className="hidden lg:block bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/history')}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:text-gray-700 touch-target flex items-center justify-center"
             >
               ← Retour
             </button>
@@ -445,9 +495,20 @@ export function PlanningEditorPage(): JSX.Element {
       </header>
 
       {/* Main content */}
-      <main className="max-w-4xl mx-auto py-8 px-4">
+      <main className="max-w-4xl mx-auto py-4 sm:py-6 lg:py-8 px-4 sm:px-6">
+        {/* Mobile: Planning name input (editable on mobile) */}
+        <div className="lg:hidden mb-4">
+          <input
+            type="text"
+            value={planningName}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setPlanningName(e.target.value)}
+            className="w-full text-lg font-bold text-gray-900 bg-white border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Nom du planning"
+          />
+        </div>
+
         {/* Sync status & dev tools */}
-        <div className="flex justify-center items-center gap-4 mb-6">
+        <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
           <SyncStatus
             status={connectionStatus}
             lastSync={lastSync}
@@ -576,7 +637,7 @@ export function PlanningEditorPage(): JSX.Element {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="flex justify-center gap-4 pt-4"
+            className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 pt-4"
           >
             {!showPlanning ? (
               <Button
@@ -584,6 +645,7 @@ export function PlanningEditorPage(): JSX.Element {
                 size="lg"
                 onClick={handleGenerate}
                 disabled={users.some(u => !u.name) || tasks.length === 0 || isGenerating}
+                className="w-full sm:w-auto touch-target"
               >
                 {isGenerating ? 'Generation...' : 'Generer le Planning'}
               </Button>
@@ -593,6 +655,7 @@ export function PlanningEditorPage(): JSX.Element {
                   variant="secondary"
                   size="lg"
                   onClick={handleReset}
+                  className="w-full sm:w-auto touch-target"
                 >
                   Modifier
                 </Button>
@@ -600,6 +663,7 @@ export function PlanningEditorPage(): JSX.Element {
                   variant="primary"
                   size="lg"
                   onClick={() => handleSave(false)}
+                  className="w-full sm:w-auto touch-target"
                 >
                   Sauvegarder
                 </Button>
@@ -613,11 +677,15 @@ export function PlanningEditorPage(): JSX.Element {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="mt-8 text-center"
+          className="mt-6 sm:mt-8 text-center pb-4 sm:pb-0"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-common/10 text-common rounded-full text-sm font-medium">
+          <div className="inline-flex flex-wrap justify-center items-center gap-2 px-3 sm:px-4 py-2 bg-common/10 text-common rounded-full text-xs sm:text-sm font-medium">
             <span className="w-2 h-2 rounded-full bg-common"></span>
-            {users.length} utilisateur{users.length > 1 ? 's' : ''} • {tasks.length} tache{tasks.length > 1 ? 's' : ''} • {milestones.length} objectif{milestones.length > 1 ? 's' : ''}
+            <span>{users.length} utilisateur{users.length > 1 ? 's' : ''}</span>
+            <span className="hidden sm:inline">•</span>
+            <span>{tasks.length} tache{tasks.length > 1 ? 's' : ''}</span>
+            <span className="hidden sm:inline">•</span>
+            <span>{milestones.length} objectif{milestones.length > 1 ? 's' : ''}</span>
           </div>
         </motion.div>
       </main>

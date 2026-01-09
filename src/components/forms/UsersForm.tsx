@@ -33,9 +33,9 @@ function UserCard({ user, onUpdate, onRemove, canRemove }: UserCardProps): JSX.E
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="p-4 border border-gray-200 rounded-lg bg-gray-50"
+      className="p-3 sm:p-4 border border-gray-200 rounded-lg bg-gray-50"
     >
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-3 sm:gap-4">
         {/* Color picker */}
         <div className="flex flex-col items-center gap-1">
           <input
@@ -43,9 +43,9 @@ function UserCard({ user, onUpdate, onRemove, canRemove }: UserCardProps): JSX.E
             value={user.color}
             onChange={handleChange('color')}
             aria-label={`Couleur de ${userName}`}
-            className="w-10 h-10 rounded-lg cursor-pointer border-2 border-white shadow-sm"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg cursor-pointer border-2 border-white shadow-sm touch-target"
           />
-          <span className="text-xs text-gray-500" aria-hidden="true">Couleur</span>
+          <span className="text-[10px] sm:text-xs text-gray-500" aria-hidden="true">Couleur</span>
         </div>
 
         {/* User info */}
@@ -59,10 +59,10 @@ function UserCard({ user, onUpdate, onRemove, canRemove }: UserCardProps): JSX.E
 
           {/* Days off */}
           <fieldset>
-            <legend className="text-sm font-medium text-gray-700 mb-2">
+            <legend className="text-xs sm:text-sm font-medium text-gray-700 mb-2">
               Jours off
             </legend>
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Sélection des jours off">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2" role="group" aria-label="Sélection des jours off">
               {DAYS_OF_WEEK.map((day) => {
                 const isSelected = (user.daysOff || []).includes(day.value)
                 return (
@@ -72,7 +72,7 @@ function UserCard({ user, onUpdate, onRemove, canRemove }: UserCardProps): JSX.E
                     onClick={() => toggleDayOff(day.value)}
                     aria-pressed={isSelected}
                     className={`
-                      px-3 py-1 text-sm rounded-full transition-colors
+                      px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm rounded-full transition-colors touch-target
                       focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1
                       ${isSelected
                         ? 'bg-primary text-white'
@@ -92,7 +92,7 @@ function UserCard({ user, onUpdate, onRemove, canRemove }: UserCardProps): JSX.E
             label="Contraintes (optionnel)"
             value={user.constraints || ''}
             onChange={handleChange('constraints')}
-            placeholder="Ex: Repos prioritaire, pas le matin..."
+            placeholder="Ex: Repos prioritaire..."
           />
         </div>
 
@@ -103,7 +103,7 @@ function UserCard({ user, onUpdate, onRemove, canRemove }: UserCardProps): JSX.E
             size="sm"
             onClick={() => onRemove(user.id)}
             aria-label={`Supprimer l'utilisateur ${userName}`}
-            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+            className="text-red-500 hover:text-red-700 hover:bg-red-50 touch-target"
           >
             <span aria-hidden="true">✕</span>
           </Button>
@@ -123,7 +123,7 @@ export interface UsersFormProps {
 export function UsersForm({ users, onUpdate, onAdd, onRemove }: UsersFormProps): JSX.Element {
   return (
     <Card title="Utilisateurs" icon="👥">
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <AnimatePresence mode="popLayout">
           {users.map((user) => (
             <UserCard
@@ -139,7 +139,7 @@ export function UsersForm({ users, onUpdate, onAdd, onRemove }: UsersFormProps):
         <Button
           variant="secondary"
           onClick={onAdd}
-          className="w-full"
+          className="w-full touch-target"
         >
           + Ajouter un utilisateur
         </Button>

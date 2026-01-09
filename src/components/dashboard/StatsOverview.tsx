@@ -70,26 +70,26 @@ export function StatsOverview({ stats }: StatsOverviewProps): JSX.Element {
   ]
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
       {cards.map((card, index) => (
         <motion.div
           key={card.label}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
-          className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
+          className="bg-white rounded-xl p-3 sm:p-4 border border-gray-200 shadow-sm"
         >
-          <div className="flex items-start justify-between mb-2">
-            <span className="text-2xl">{card.icon}</span>
-            <span className={`text-2xl font-bold ${card.isPercentage ? 'text-primary' : 'text-gray-900'}`}>
+          <div className="flex items-start justify-between mb-1 sm:mb-2">
+            <span className="text-xl sm:text-2xl">{card.icon}</span>
+            <span className={`text-xl sm:text-2xl font-bold ${card.isPercentage ? 'text-primary' : 'text-gray-900'}`}>
               {card.value}
             </span>
           </div>
 
-          <h4 className="text-sm font-medium text-gray-600 mb-2">{card.label}</h4>
+          <h4 className="text-xs sm:text-sm font-medium text-gray-600 mb-1 sm:mb-2 truncate">{card.label}</h4>
 
           {card.progress !== undefined && (
-            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-2">
+            <div className="h-1 sm:h-1.5 bg-gray-100 rounded-full overflow-hidden mb-1 sm:mb-2">
               <motion.div
                 className={`h-full ${card.progressColor} rounded-full`}
                 initial={{ width: 0 }}
@@ -100,10 +100,10 @@ export function StatsOverview({ stats }: StatsOverviewProps): JSX.Element {
           )}
 
           {card.subStats && (
-            <div className="space-y-1">
+            <div className="space-y-0.5 sm:space-y-1">
               {card.subStats.map((sub) => (
-                <div key={sub.label} className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500">{sub.label}</span>
+                <div key={sub.label} className="flex items-center justify-between text-[10px] sm:text-xs">
+                  <span className="text-gray-500 truncate">{sub.label}</span>
                   <span className={`font-medium ${sub.color || 'text-gray-700'}`}>{sub.value}</span>
                 </div>
               ))}

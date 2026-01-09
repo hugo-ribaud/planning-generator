@@ -58,23 +58,23 @@ function TaskCard({ task, users, onUpdate, onRemove }: TaskCardProps): JSX.Eleme
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="p-4 border border-gray-200 rounded-lg bg-gray-50"
+      className="p-3 sm:p-4 border border-gray-200 rounded-lg bg-gray-50"
     >
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {/* Header with name and remove */}
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-2 sm:gap-3">
           <input
             type="color"
             value={task.color || '#6B7280'}
             onChange={handleChange('color')}
             aria-label={`Couleur de la tâche ${taskName}`}
-            className="w-8 h-8 rounded cursor-pointer border-2 border-white shadow-sm mt-1"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded cursor-pointer border-2 border-white shadow-sm mt-5 sm:mt-6 touch-target"
           />
           <Input
             label="Nom de la tâche"
             value={task.name}
             onChange={handleChange('name')}
-            placeholder="Ex: Conversari, Sport, TFT..."
+            placeholder="Ex: Conversari, Sport..."
             className="flex-1"
           />
           <Button
@@ -82,20 +82,21 @@ function TaskCard({ task, users, onUpdate, onRemove }: TaskCardProps): JSX.Eleme
             size="sm"
             onClick={() => onRemove(task.id)}
             aria-label={`Supprimer la tâche ${taskName}`}
-            className="text-red-500 hover:text-red-700 hover:bg-red-50 mt-6"
+            className="text-red-500 hover:text-red-700 hover:bg-red-50 mt-5 sm:mt-6 touch-target"
           >
             <span aria-hidden="true">✕</span>
           </Button>
         </div>
 
-        {/* Row 1: Assignee, Type, Recurrence */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* Row 1: Assignee, Type, Recurrence - responsive grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
           <Select
             label="Assigné à"
             value={task.assignedTo || ''}
             onChange={handleChange('assignedTo')}
             options={assigneeOptions}
             placeholder="Sélectionner..."
+            className="col-span-2 sm:col-span-1"
           />
           <Select
             label="Type"
@@ -111,8 +112,8 @@ function TaskCard({ task, users, onUpdate, onRemove }: TaskCardProps): JSX.Eleme
           />
         </div>
 
-        {/* Row 2: Duration, Priority, Preferred time */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* Row 2: Duration, Priority, Preferred time - responsive grid */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <Select
             label="Durée"
             value={String(task.duration)}
@@ -126,19 +127,19 @@ function TaskCard({ task, users, onUpdate, onRemove }: TaskCardProps): JSX.Eleme
             options={PRIORITY_OPTIONS}
           />
           <Select
-            label="Créneau préféré"
+            label="Créneau"
             value={task.preferredTime}
             onChange={handleChange('preferredTime')}
             options={TIME_PREFERENCES}
           />
         </div>
 
-        {/* Preferred days */}
+        {/* Preferred days - horizontal scroll on mobile */}
         <fieldset>
-          <legend className="text-sm font-medium text-gray-700 mb-2">
+          <legend className="text-xs sm:text-sm font-medium text-gray-700 mb-2">
             Jours préférés (optionnel)
           </legend>
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Sélection des jours préférés">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2" role="group" aria-label="Sélection des jours préférés">
             {DAYS_OF_WEEK.map((day) => {
               const isSelected = (task.preferredDays || []).includes(day.value)
               return (
@@ -148,7 +149,7 @@ function TaskCard({ task, users, onUpdate, onRemove }: TaskCardProps): JSX.Eleme
                   onClick={() => togglePreferredDay(day.value)}
                   aria-pressed={isSelected}
                   className={`
-                    px-3 py-1 text-sm rounded-full transition-colors
+                    px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm rounded-full transition-colors touch-target
                     focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1
                     ${isSelected
                       ? 'bg-primary text-white'
@@ -178,11 +179,11 @@ export interface TasksFormProps {
 export function TasksForm({ tasks, users, onUpdate, onAdd, onRemove }: TasksFormProps): JSX.Element {
   return (
     <Card title="Tâches à planifier" icon="📋">
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {tasks.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <p className="mb-2">Aucune tâche ajoutée</p>
-            <p className="text-sm">Ajoutez vos tâches récurrentes ou ponctuelles</p>
+          <div className="text-center py-6 sm:py-8 text-gray-500">
+            <p className="mb-2 text-sm sm:text-base">Aucune tâche ajoutée</p>
+            <p className="text-xs sm:text-sm">Ajoutez vos tâches récurrentes ou ponctuelles</p>
           </div>
         ) : (
           <AnimatePresence mode="popLayout">
@@ -201,7 +202,7 @@ export function TasksForm({ tasks, users, onUpdate, onAdd, onRemove }: TasksForm
         <Button
           variant="secondary"
           onClick={onAdd}
-          className="w-full"
+          className="w-full touch-target"
         >
           + Ajouter une tâche
         </Button>
