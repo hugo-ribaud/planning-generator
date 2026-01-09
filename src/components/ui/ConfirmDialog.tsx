@@ -1,3 +1,8 @@
+/**
+ * ConfirmDialog - Modal de confirmation accessible
+ * Utilise pour confirmer les actions destructrices (suppression, etc.)
+ */
+
 import { useEffect, useRef, useCallback, type KeyboardEvent } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Button } from './Button'
@@ -16,31 +21,31 @@ export interface ConfirmDialogProps {
 }
 
 const variantStyles: Record<ConfirmDialogVariant, {
+  icon: string
   iconBg: string
   iconColor: string
-  icon: string
+  confirmButtonClass: string
 }> = {
   danger: {
+    icon: '&#9888;',
     iconBg: 'bg-red-100',
     iconColor: 'text-red-600',
-    icon: '!',
+    confirmButtonClass: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
   },
   warning: {
-    iconBg: 'bg-yellow-100',
-    iconColor: 'text-yellow-600',
-    icon: '!',
+    icon: '&#9888;',
+    iconBg: 'bg-amber-100',
+    iconColor: 'text-amber-600',
+    confirmButtonClass: 'bg-amber-600 hover:bg-amber-700 focus:ring-amber-500',
   },
   info: {
+    icon: '&#8505;',
     iconBg: 'bg-blue-100',
     iconColor: 'text-blue-600',
-    icon: '?',
+    confirmButtonClass: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
   },
 }
 
-/**
- * Dialogue de confirmation accessible pour les actions destructives
- * Implémente: focus trap, navigation clavier, attributs ARIA
- */
 export function ConfirmDialog({
   isOpen,
   onConfirm,
@@ -52,76 +57,83 @@ export function ConfirmDialog({
   variant = 'danger',
 }: ConfirmDialogProps): JSX.Element {
   const dialogRef = useRef<HTMLDivElement>(null)
-  const cancelButtonRef = useRef<HTMLButtonElement>(null)
   const confirmButtonRef = useRef<HTMLButtonElement>(null)
+  const cancelButtonRef = useRef<HTMLButtonElement>(null)
+  const previousActiveElement = useRef<HTMLElement | null>(null)
 
   const styles = variantStyles[variant]
 
-  // Focus the cancel button when dialog opens (safer default)
+  // Store previously focused element and focus first button on open
   useEffect(() => {
-    if (isOpen && cancelButtonRef.current) {
-      cancelButtonRef.current.focus()
+    if (isOpen) {
+      previousActiveElement.current = document.activeElement as HTMLElement
+      // Focus cancel button by default (safer option)
+      setTimeout(() => {
+        cancelButtonRef.current?.focus()
+      }, 0)
+    } else {
+      // Restore focus on close
+      previousActiveElement.current?.focus()
     }
   }, [isOpen])
 
   // Handle escape key
-  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Escape') {
-      e.preventDefault()
+  const handleKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault()
       onCancel()
     }
 
-    // Focus trap
-    if (e.key === 'Tab') {
-      const focusableElements = dialogRef.current?.querySelectorAll<HTMLElement>(
-        'button:not([disabled])'
-      )
-      if (!focusableElements || focusableElements.length === 0) return
-
+    // Focus trap - Tab cycling between buttons
+    if (event.key === 'Tab') {
+      const focusableElements = [cancelButtonRef.current, confirmButtonRef.current].filter(Boolean) as HTMLElement[]
       const firstElement = focusableElements[0]
       const lastElement = focusableElements[focusableElements.length - 1]
 
-      if (e.shiftKey) {
+      if (event.shiftKey) {
         if (document.activeElement === firstElement) {
-          e.preventDefault()
-          lastElement.focus()
+          event.preventDefault()
+          lastElement?.focus()
         }
       } else {
         if (document.activeElement === lastElement) {
-          e.preventDefault()
-          firstElement.focus()
+          event.preventDefault()
+          firstElement?.focus()
         }
       }
     }
   }, [onCancel])
 
-  // Prevent body scroll when dialog is open
+  // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
-      const originalOverflow = document.body.style.overflow
       document.body.style.overflow = 'hidden'
-      return () => {
-        document.body.style.overflow = originalOverflow
-      }
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
     }
   }, [isOpen])
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          role="presentation"
+        <div
+          ref={dialogRef}
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="confirm-dialog-title"
+          aria-describedby="confirm-dialog-message"
+          onKeyDown={handleKeyDown}
+          className="fixed inset-0 z-50 flex items-center justify-center"
         >
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
             className="absolute inset-0 bg-black/50"
             onClick={onCancel}
             aria-hidden="true"
@@ -129,69 +141,61 @@ export function ConfirmDialog({
 
           {/* Dialog */}
           <motion.div
-            ref={dialogRef}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="confirm-dialog-title"
-            aria-describedby="confirm-dialog-description"
-            onKeyDown={handleKeyDown}
-            className="relative bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden"
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className="relative bg-white rounded-xl shadow-xl max-w-md w-full mx-4 overflow-hidden"
           >
             <div className="p-6">
-              {/* Icon */}
-              <div className="flex items-center justify-center mb-4">
-                <div className={`
-                  w-12 h-12 rounded-full flex items-center justify-center
-                  ${styles.iconBg}
-                `}>
-                  <span className={`text-2xl font-bold ${styles.iconColor}`}>
-                    {styles.icon}
-                  </span>
+              {/* Icon and Title */}
+              <div className="flex items-start gap-4">
+                <div
+                  className={`flex-shrink-0 w-10 h-10 rounded-full ${styles.iconBg} ${styles.iconColor} flex items-center justify-center text-xl`}
+                  aria-hidden="true"
+                  dangerouslySetInnerHTML={{ __html: styles.icon }}
+                />
+                <div className="flex-1 min-w-0">
+                  <h2
+                    id="confirm-dialog-title"
+                    className="text-lg font-semibold text-gray-900"
+                  >
+                    {title}
+                  </h2>
+                  <p
+                    id="confirm-dialog-message"
+                    className="mt-2 text-sm text-gray-600"
+                  >
+                    {message}
+                  </p>
                 </div>
               </div>
 
-              {/* Title */}
-              <h2
-                id="confirm-dialog-title"
-                className="text-xl font-semibold text-gray-900 text-center mb-2"
-              >
-                {title}
-              </h2>
-
-              {/* Message */}
-              <p
-                id="confirm-dialog-description"
-                className="text-gray-600 text-center mb-6"
-              >
-                {message}
-              </p>
-
               {/* Actions */}
-              <div className="flex gap-3">
+              <div className="mt-6 flex justify-end gap-3">
                 <Button
                   ref={cancelButtonRef}
                   variant="secondary"
                   onClick={onCancel}
-                  className="flex-1"
                 >
                   {cancelLabel}
                 </Button>
-                <Button
+                <button
                   ref={confirmButtonRef}
-                  variant={variant === 'danger' ? 'danger' : 'primary'}
+                  type="button"
                   onClick={onConfirm}
-                  className="flex-1"
+                  className={`
+                    px-4 py-2 rounded-lg font-medium text-white
+                    transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2
+                    ${styles.confirmButtonClass}
+                  `}
                 >
                   {confirmLabel}
-                </Button>
+                </button>
               </div>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
     </AnimatePresence>
   )
