@@ -1,5 +1,5 @@
 import { motion, HTMLMotionProps } from 'motion/react'
-import { ReactNode, ButtonHTMLAttributes } from 'react'
+import { ReactNode, ButtonHTMLAttributes, forwardRef } from 'react'
 
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost'
 export type ButtonSize = 'sm' | 'md' | 'lg'
@@ -26,18 +26,22 @@ export interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'>
   className?: string
 }
 
-export function Button({
-  children,
-  variant = 'primary',
-  size = 'md',
-  disabled = false,
-  type = 'button',
-  onClick,
-  className = '',
-  ...props
-}: ButtonProps): JSX.Element {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    children,
+    variant = 'primary',
+    size = 'md',
+    disabled = false,
+    type = 'button',
+    onClick,
+    className = '',
+    ...props
+  },
+  ref
+) {
   return (
     <motion.button
+      ref={ref}
       whileHover={{ scale: disabled ? 1 : 1.02 }}
       whileTap={{ scale: disabled ? 1 : 0.98 }}
       type={type}
@@ -55,4 +59,4 @@ export function Button({
       {children}
     </motion.button>
   )
-}
+})

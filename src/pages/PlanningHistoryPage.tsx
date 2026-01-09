@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { useAuth } from '../contexts/AuthContext'
 import { usePlannings } from '../hooks/usePlannings'
-import { Button, Card } from '../components/ui'
+import { Button, Card, ConfirmDialog } from '../components/ui'
 import type { Planning, PlanningConfig } from '../types'
 
 // Filter options
@@ -61,153 +61,148 @@ interface PlanningCardProps {
 // Planning Card Component
 function PlanningCard({ planning, onLoad, onDuplicate, onArchive, onDelete, onShare }: PlanningCardProps): JSX.Element {
   const [showActions, setShowActions] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const usersCount = planning.users_data?.length || 0
   const tasksCount = planning.tasks_data?.length || 0
   const hasResult = !!planning.planning_result
 
+  const handleConfirmDelete = (): void => {
+    onDelete(planning.id)
+    setShowDeleteConfirm(false)
+  }
+
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className="relative"
-    >
-      <Card
-        className={`
-          cursor-pointer hover:shadow-md transition-shadow
-          ${planning.is_archived ? 'opacity-60' : ''}
-        `}
-        animate={false}
-        onClick={() => onLoad(planning.id)}
-        onMouseEnter={() => setShowActions(true)}
-        onMouseLeave={() => {
-          setShowActions(false)
-          setConfirmDelete(false)
-        }}
+    <>
+      <motion.div
+        layout
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="relative"
       >
-        {/* Header */}
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 truncate">
-              {planning.name}
-            </h3>
-            <p className="text-sm text-gray-500">
-              {formatRelativeDate(planning.updated_at)}
-            </p>
-          </div>
+        <Card
+          className={`
+            cursor-pointer hover:shadow-md transition-shadow
+            ${planning.is_archived ? 'opacity-60' : ''}
+          `}
+          animate={false}
+          onClick={() => onLoad(planning.id)}
+          onMouseEnter={() => setShowActions(true)}
+          onMouseLeave={() => {
+            setShowActions(false)
+          }}
+        >
+          {/* Header */}
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-gray-900 truncate">
+                {planning.name}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {formatRelativeDate(planning.updated_at)}
+              </p>
+            </div>
 
-          {/* Status badges */}
-          <div className="flex gap-1">
-            {planning.is_public && (
-              <span className="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">
-                Partage
-              </span>
-            )}
-            {planning.is_archived && (
-              <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">
-                Archive
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="flex gap-4 text-sm text-gray-600 mb-3">
-          <span>{usersCount} utilisateur{usersCount > 1 ? 's' : ''}</span>
-          <span>{tasksCount} tache{tasksCount > 1 ? 's' : ''}</span>
-          {hasResult && (
-            <span className="text-green-600">Genere</span>
-          )}
-        </div>
-
-        {/* Config summary */}
-        {planning.config && (
-          <div className="text-xs text-gray-500">
-            {planning.config.startDate && (
-              <span>
-                Du {new Date(planning.config.startDate).toLocaleDateString('fr-FR')}
-                {planning.config.endDate && ` au ${new Date(planning.config.endDate).toLocaleDateString('fr-FR')}`}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Action buttons (on hover) */}
-        <AnimatePresence>
-          {showActions && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-white/95 rounded-xl flex items-center justify-center gap-2 p-4"
-              onClick={(e: MouseEvent) => e.stopPropagation()}
-            >
-              {confirmDelete ? (
-                <>
-                  <span className="text-sm text-red-600 mr-2">Confirmer ?</span>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => onDelete(planning.id)}
-                  >
-                    Oui, supprimer
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setConfirmDelete(false)}
-                  >
-                    Annuler
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => onLoad(planning.id)}
-                  >
-                    Ouvrir
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => onDuplicate(planning.id)}
-                  >
-                    Dupliquer
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onShare(planning)}
-                  >
-                    {planning.is_public ? 'Lien' : 'Partager'}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onArchive(planning.id, !planning.is_archived)}
-                  >
-                    {planning.is_archived ? 'Restaurer' : 'Archiver'}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-600 hover:bg-red-50"
-                    onClick={() => setConfirmDelete(true)}
-                  >
-                    Supprimer
-                  </Button>
-                </>
+            {/* Status badges */}
+            <div className="flex gap-1">
+              {planning.is_public && (
+                <span className="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">
+                  Partage
+                </span>
               )}
-            </motion.div>
+              {planning.is_archived && (
+                <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">
+                  Archive
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="flex gap-4 text-sm text-gray-600 mb-3">
+            <span>{usersCount} utilisateur{usersCount > 1 ? 's' : ''}</span>
+            <span>{tasksCount} tache{tasksCount > 1 ? 's' : ''}</span>
+            {hasResult && (
+              <span className="text-green-600">Genere</span>
+            )}
+          </div>
+
+          {/* Config summary */}
+          {planning.config && (
+            <div className="text-xs text-gray-500">
+              {planning.config.startDate && (
+                <span>
+                  Du {new Date(planning.config.startDate).toLocaleDateString('fr-FR')}
+                  {planning.config.endDate && ` au ${new Date(planning.config.endDate).toLocaleDateString('fr-FR')}`}
+                </span>
+              )}
+            </div>
           )}
-        </AnimatePresence>
-      </Card>
-    </motion.div>
+
+          {/* Action buttons (on hover) */}
+          <AnimatePresence>
+            {showActions && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-white/95 rounded-xl flex items-center justify-center gap-2 p-4"
+                onClick={(e: MouseEvent) => e.stopPropagation()}
+              >
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => onLoad(planning.id)}
+                >
+                  Ouvrir
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => onDuplicate(planning.id)}
+                >
+                  Dupliquer
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onShare(planning)}
+                >
+                  {planning.is_public ? 'Lien' : 'Partager'}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onArchive(planning.id, !planning.is_archived)}
+                >
+                  {planning.is_archived ? 'Restaurer' : 'Archiver'}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600 hover:bg-red-50"
+                  onClick={() => setShowDeleteConfirm(true)}
+                >
+                  Supprimer
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Card>
+      </motion.div>
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+        title="Supprimer ce planning ?"
+        message={`Le planning "${planning.name}" sera definitivement supprime avec toutes ses donnees.`}
+        confirmLabel="Supprimer"
+        cancelLabel="Annuler"
+        variant="danger"
+      />
+    </>
   )
 }
 
