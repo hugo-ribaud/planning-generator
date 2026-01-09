@@ -7,6 +7,8 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   icon?: ReactNode
   className?: string
   animate?: boolean
+  /** Compact padding on mobile */
+  compact?: boolean
 }
 
 export function Card({
@@ -15,6 +17,7 @@ export function Card({
   icon,
   className = '',
   animate = true,
+  compact = false,
   ...props
 }: CardProps): JSX.Element {
   const animationProps: HTMLMotionProps<'div'> = animate ? {
@@ -23,22 +26,31 @@ export function Card({
     transition: { duration: 0.3 }
   } : {}
 
+  // Responsive padding: smaller on mobile, larger on desktop
+  const paddingClass = compact
+    ? 'p-3 sm:p-4'
+    : 'p-4 sm:p-6'
+
+  const cardClassName = `
+    bg-white rounded-xl shadow-sm border border-gray-200 ${paddingClass}
+    ${className}
+  `
+
+  const titleElement = title && (
+    <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
+      {icon && <span className="text-base sm:text-lg">{icon}</span>}
+      {title}
+    </h2>
+  )
+
   if (animate) {
     return (
       <motion.div
-        className={`
-          bg-white rounded-xl shadow-sm border border-gray-200 p-6
-          ${className}
-        `}
+        className={cardClassName}
         {...animationProps}
         {...(props as HTMLMotionProps<'div'>)}
       >
-        {title && (
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            {icon && <span>{icon}</span>}
-            {title}
-          </h2>
-        )}
+        {titleElement}
         {children}
       </motion.div>
     )
@@ -46,18 +58,10 @@ export function Card({
 
   return (
     <div
-      className={`
-        bg-white rounded-xl shadow-sm border border-gray-200 p-6
-        ${className}
-      `}
+      className={cardClassName}
       {...props}
     >
-      {title && (
-        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          {icon && <span>{icon}</span>}
-          {title}
-        </h2>
-      )}
+      {titleElement}
       {children}
     </div>
   )

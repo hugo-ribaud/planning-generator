@@ -21,3 +21,6 @@ export type { ConfirmDialogProps, ConfirmDialogVariant } from './ConfirmDialog'
 
 export { UndoRedoControls, UndoRedoControlsCompact } from './UndoRedoControls'
 export type { UndoRedoControlsProps } from './UndoRedoControls'
+
+export { MobileNav, NavLink, HamburgerIcon, CloseIcon } from './MobileNav'
+export type { MobileNavProps, NavLinkProps } from './MobileNav'

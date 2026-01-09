@@ -31,14 +31,14 @@ export function GeneralConfigForm({ config, errors, onUpdate }: GeneralConfigFor
 
   return (
     <Card title="Configuration générale" icon="⚙️">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         {/* Planning name */}
         <Input
           label="Nom du planning"
           value={config.name}
           onChange={handleChange('name')}
           placeholder="Ex: Planning Janvier"
-          className="md:col-span-2"
+          className="sm:col-span-2"
         />
 
         {/* Period */}
@@ -56,35 +56,43 @@ export function GeneralConfigForm({ config, errors, onUpdate }: GeneralConfigFor
           onChange={handleChange('startDate')}
         />
 
-        {/* Work hours */}
-        <TimeInput
-          label="Début de journée"
-          value={config.workStart}
-          onChange={handleChange('workStart')}
-          error={errors.workStart}
-        />
+        {/* Work hours - grouped on mobile */}
+        <div className="sm:col-span-2">
+          <p className="text-sm font-medium text-gray-700 mb-2 sm:hidden">Horaires de travail</p>
+          <div className="grid grid-cols-2 gap-3">
+            <TimeInput
+              label="Début journée"
+              value={config.workStart}
+              onChange={handleChange('workStart')}
+              error={errors.workStart}
+            />
+            <TimeInput
+              label="Fin journée"
+              value={config.workEnd}
+              onChange={handleChange('workEnd')}
+              error={errors.workEnd}
+            />
+          </div>
+        </div>
 
-        <TimeInput
-          label="Fin de journée"
-          value={config.workEnd}
-          onChange={handleChange('workEnd')}
-          error={errors.workEnd}
-        />
-
-        {/* Lunch break */}
-        <TimeInput
-          label="Début pause déjeuner"
-          value={config.lunchStart}
-          onChange={handleChange('lunchStart')}
-          error={errors.lunchStart}
-        />
-
-        <TimeInput
-          label="Fin pause déjeuner"
-          value={config.lunchEnd}
-          onChange={handleChange('lunchEnd')}
-          error={errors.lunchEnd}
-        />
+        {/* Lunch break - grouped on mobile */}
+        <div className="sm:col-span-2">
+          <p className="text-sm font-medium text-gray-700 mb-2 sm:hidden">Pause déjeuner</p>
+          <div className="grid grid-cols-2 gap-3">
+            <TimeInput
+              label="Début pause"
+              value={config.lunchStart}
+              onChange={handleChange('lunchStart')}
+              error={errors.lunchStart}
+            />
+            <TimeInput
+              label="Fin pause"
+              value={config.lunchEnd}
+              onChange={handleChange('lunchEnd')}
+              error={errors.lunchEnd}
+            />
+          </div>
+        </div>
 
         {/* Slot duration */}
         <Select
@@ -92,7 +100,7 @@ export function GeneralConfigForm({ config, errors, onUpdate }: GeneralConfigFor
           value={String(config.slotDuration)}
           onChange={(e) => onUpdate('slotDuration', parseInt(e.target.value, 10))}
           options={SLOT_DURATION_OPTIONS}
-          className="md:col-span-2"
+          className="sm:col-span-2"
         />
       </div>
     </Card>

@@ -15,13 +15,13 @@ export function FocusBanner({ milestone, users }: FocusBannerProps): JSX.Element
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-gray-100 to-gray-50 rounded-xl p-6 border border-gray-200"
+        className="bg-gradient-to-r from-gray-100 to-gray-50 rounded-xl p-4 sm:p-6 border border-gray-200"
       >
         <div className="text-center">
-          <span className="text-2xl mb-2 block">🎯</span>
-          <h3 className="text-lg font-medium text-gray-600">Aucun objectif en focus</h3>
-          <p className="text-sm text-gray-500 mt-1">
-            Sélectionnez un objectif prioritaire pour le mettre en avant
+          <span className="text-xl sm:text-2xl mb-2 block">🎯</span>
+          <h3 className="text-base sm:text-lg font-medium text-gray-600">Aucun objectif en focus</h3>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            Selectionnez un objectif prioritaire pour le mettre en avant
           </p>
         </div>
       </motion.div>
@@ -39,32 +39,32 @@ export function FocusBanner({ milestone, users }: FocusBannerProps): JSX.Element
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-xl p-6 border border-primary/20"
+      className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-xl p-4 sm:p-6 border border-primary/20"
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
+      <div className="flex items-start justify-between gap-3 sm:gap-4">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-2xl">🎯</span>
-            <span className="text-xs font-medium px-2 py-0.5 bg-primary/20 text-primary rounded-full uppercase tracking-wide">
+            <span className="text-xl sm:text-2xl">🎯</span>
+            <span className="text-[10px] sm:text-xs font-medium px-2 py-0.5 bg-primary/20 text-primary rounded-full uppercase tracking-wide">
               Focus actuel
             </span>
           </div>
 
-          <h3 className="text-xl font-bold text-gray-900 mb-1">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 truncate">
             {milestone.title}
           </h3>
 
           {milestone.description && (
-            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+            <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2">
               {milestone.description}
             </p>
           )}
 
-          <div className="flex flex-wrap items-center gap-4 text-sm">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
             {assignedUser && (
               <div className="flex items-center gap-1.5">
                 <span
-                  className="w-3 h-3 rounded-full"
+                  className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full"
                   style={{ backgroundColor: assignedUser.color }}
                 />
                 <span className="text-gray-600">{assignedUser.name}</span>
@@ -73,7 +73,7 @@ export function FocusBanner({ milestone, users }: FocusBannerProps): JSX.Element
 
             {targetDate && daysRemaining !== null && (
               <div className="flex items-center gap-1.5">
-                <span className="text-gray-400">📅</span>
+                <span className="text-gray-400 text-xs sm:text-sm">📅</span>
                 <span className={`${daysRemaining < 0 ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
                   {daysRemaining < 0
                     ? `En retard de ${Math.abs(daysRemaining)} jour${Math.abs(daysRemaining) > 1 ? 's' : ''}`
@@ -89,9 +89,9 @@ export function FocusBanner({ milestone, users }: FocusBannerProps): JSX.Element
           </div>
         </div>
 
-        {/* Progress circle */}
-        <div className="relative w-20 h-20 flex-shrink-0">
-          <svg className="w-full h-full transform -rotate-90">
+        {/* Progress circle - smaller on mobile */}
+        <div className="relative w-14 h-14 sm:w-20 sm:h-20 flex-shrink-0">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
             <circle
               cx="40"
               cy="40"
@@ -116,14 +116,14 @@ export function FocusBanner({ milestone, users }: FocusBannerProps): JSX.Element
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-lg font-bold text-gray-900">{progress}%</span>
+            <span className="text-sm sm:text-lg font-bold text-gray-900">{progress}%</span>
           </div>
         </div>
       </div>
 
       {/* Progress bar */}
-      <div className="mt-4">
-        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div className="mt-3 sm:mt-4">
+        <div className="h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-primary rounded-full"
             initial={{ width: 0 }}

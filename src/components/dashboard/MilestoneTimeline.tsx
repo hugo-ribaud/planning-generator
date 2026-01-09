@@ -36,22 +36,22 @@ export function MilestoneTimeline({ upcomingMilestones, overdueMilestones, users
 
   if (hasNoItems) {
     return (
-      <div className="bg-white rounded-xl p-6 border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Timeline</h3>
-        <div className="text-center py-8 text-gray-500">
-          <span className="text-3xl mb-2 block">📅</span>
-          <p>Aucun objectif avec date cible</p>
-          <p className="text-sm mt-1">Ajoutez des dates à vos objectifs pour les voir ici</p>
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Timeline</h3>
+        <div className="text-center py-6 sm:py-8 text-gray-500">
+          <span className="text-2xl sm:text-3xl mb-2 block">📅</span>
+          <p className="text-sm sm:text-base">Aucun objectif avec date cible</p>
+          <p className="text-xs sm:text-sm mt-1">Ajoutez des dates a vos objectifs pour les voir ici</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl p-6 border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Timeline</h3>
+    <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200">
+      <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Timeline</h3>
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Overdue section */}
         <AnimatePresence>
           {overdueMilestones.length > 0 && (
