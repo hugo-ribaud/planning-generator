@@ -129,6 +129,7 @@ export function PlanningEditorPage(): JSX.Element {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [currentPlanningId, setCurrentPlanningId] = useState<string | null>(planningId || null)
+  const [isLoadingPlanning, setIsLoadingPlanning] = useState(planningId !== undefined && planningId !== 'new')
 
   // Auto-save ref to track changes
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -224,31 +225,37 @@ export function PlanningEditorPage(): JSX.Element {
   useEffect(() => {
     const loadExistingPlanning = async (): Promise<void> => {
       if (planningId && planningId !== 'new') {
-        const { data, error } = await fetchPlanning(planningId)
-        if (error) {
-          toast.error('Impossible de charger le planning')
-          navigate('/history')
-          return
-        }
-
-        if (data) {
-          const planningData = data as PlanningData
-          setPlanningName(planningData.name || 'Planning sans titre')
-          setCurrentPlanningId(planningData.id)
-
-          // Load data into hooks
-          if (planningData.config) loadConfig(planningData.config)
-          if (planningData.users_data) loadUsers(planningData.users_data)
-          if (planningData.tasks_data) loadTasks(planningData.tasks_data)
-          if (planningData.milestones_data) loadMilestones(planningData.milestones_data)
-          if (planningData.shopping_list) loadShoppingList(planningData.shopping_list)
-          if (planningData.planning_result) {
-            loadPlanning(planningData.planning_result)
-            setShowPlanning(true)
+        try {
+          const { data, error } = await fetchPlanning(planningId)
+          if (error) {
+            toast.error('Impossible de charger le planning')
+            navigate('/history')
+            return
           }
 
-          setLastSaved(new Date(planningData.updated_at))
+          if (data) {
+            const planningData = data as PlanningData
+            setPlanningName(planningData.name || 'Planning sans titre')
+            setCurrentPlanningId(planningData.id)
+
+            // Load data into hooks
+            if (planningData.config) loadConfig(planningData.config)
+            if (planningData.users_data) loadUsers(planningData.users_data)
+            if (planningData.tasks_data) loadTasks(planningData.tasks_data)
+            if (planningData.milestones_data) loadMilestones(planningData.milestones_data)
+            if (planningData.shopping_list) loadShoppingList(planningData.shopping_list)
+            if (planningData.planning_result) {
+              loadPlanning(planningData.planning_result)
+              setShowPlanning(true)
+            }
+
+            setLastSaved(new Date(planningData.updated_at))
+          }
+        } finally {
+          setIsLoadingPlanning(false)
         }
+      } else {
+        setIsLoadingPlanning(false)
       }
     }
 
@@ -364,6 +371,18 @@ export function PlanningEditorPage(): JSX.Element {
     navigate('/login')
   }
 
+  // Loading state for initial fetch
+  if (isLoadingPlanning) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
+          <p className="text-gray-500">Chargement du planning...</p>
+        </div>
+      </div>
+    )
+  }
+
   // Printable view
   if (showPrintable) {
     return (
@@ -379,6 +398,7 @@ export function PlanningEditorPage(): JSX.Element {
           users={users}
           milestones={milestones}
           config={config}
+          shoppingList={shoppingList}
         />
       </div>
     )
@@ -522,7 +542,7 @@ export function PlanningEditorPage(): JSX.Element {
               Charger donnees test
             </button>
           )}
-          {(tasks.length > 0 || milestones.length > 0) && (
+          {planning && planning.length > 0 && (
             <button
               onClick={() => setShowPrintable(true)}
               className="px-3 py-1.5 text-xs font-medium bg-amber-700 hover:bg-amber-800 text-white rounded-full transition-colors"

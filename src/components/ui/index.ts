@@ -16,5 +16,11 @@ export type { SyncStatusProps } from './SyncStatus'
 export { Toast, ToastContainer } from './Toast'
 export type { ToastProps, ToastContainerProps } from './Toast'
 
+export { ConfirmDialog } from './ConfirmDialog'
+export type { ConfirmDialogProps, ConfirmDialogVariant } from './ConfirmDialog'
+
+export { UndoRedoControls, UndoRedoControlsCompact } from './UndoRedoControls'
+export type { UndoRedoControlsProps } from './UndoRedoControls'
+
 export { MobileNav, NavLink, HamburgerIcon, CloseIcon } from './MobileNav'
 export type { MobileNavProps, NavLinkProps } from './MobileNav'

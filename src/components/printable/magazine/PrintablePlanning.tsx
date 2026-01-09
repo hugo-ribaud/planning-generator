@@ -4,7 +4,8 @@ import { WeekOverview } from './WeekOverview'
 import { FocusArticle } from './FocusArticle'
 import { MilestoneCards } from './MilestoneCards'
 import { QuickNotes, type NoteItem } from './QuickNotes'
-import type { User, Milestone, PlanningWeek, PlanningConfig } from '../../../types'
+import { PrintableShoppingList } from './PrintableShoppingList'
+import type { User, Milestone, PlanningWeek, PlanningConfig, ShoppingList } from '../../../types'
 
 /**
  * PrintablePlanning - Main container for magazine-style printable planning
@@ -26,9 +27,10 @@ export interface PrintablePlanningProps {
   milestones?: PrintableMilestone[]
   config?: Partial<PlanningConfig>
   notes?: NoteItem[]
+  shoppingList?: ShoppingList
 }
 
-export function PrintablePlanning({ weeks, users, milestones, config, notes = [] }: PrintablePlanningProps): JSX.Element {
+export function PrintablePlanning({ weeks, users, milestones, config, notes = [], shoppingList }: PrintablePlanningProps): JSX.Element {
   if (!weeks || weeks.length === 0) {
     return (
       <div className="printable-planning-empty p-8 text-center text-gray-500">
@@ -139,13 +141,16 @@ export function PrintablePlanning({ weeks, users, milestones, config, notes = []
             />
           </div>
 
-          {/* Sidebar: Week Overview + Quick Notes */}
+          {/* Sidebar: Week Overview + Quick Notes + Shopping */}
           <div className="col-span-5 space-y-4">
             <WeekOverview
               days={currentWeek.days}
               users={users}
             />
             <QuickNotes notes={notes} maxItems={5} />
+            {shoppingList && shoppingList.categories.some(c => c.items && c.items.length > 0) && (
+              <PrintableShoppingList shoppingList={shoppingList} maxCategories={4} />
+            )}
           </div>
         </div>
       </div>

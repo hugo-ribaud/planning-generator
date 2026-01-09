@@ -6,6 +6,8 @@ export { useRealtimeSync, detectChangedFields, getFieldLabel } from './useRealti
 export { useToasts } from './useToasts'
 export { useShoppingList } from './useShoppingList'
 export { usePlannings } from './usePlannings'
+export { useUndoRedo, useUndoRedoKeyboard } from './useUndoRedo'
+export { usePlanningConfigWithHistory } from './usePlanningConfigWithHistory'
 
 // Re-export types
 export type { UsePlanningConfigReturn, PlanningConfigState, ConfigErrors } from './usePlanningConfig'
@@ -16,3 +18,6 @@ export type { UseRealtimeSyncReturn, RealtimeHandlers, ConnectionStatus } from '
 export type { UseToastsReturn, Toast, ToastType, ToastMethods } from './useToasts'
 export type { UseShoppingListReturn, ShoppingListStats } from './useShoppingList'
 export type { UsePlanningsReturn, FetchOptions, CreatePlanningData, UpdatePlanningData, ShareResult } from './usePlannings'
+export type { UseUndoRedoOptions, UseUndoRedoReturn, UndoRedoAction, UndoRedoWrapper } from './useUndoRedo'
+export type { UsePlanningConfigWithHistoryOptions, UsePlanningConfigWithHistoryReturn, PlanningSnapshot } from './usePlanningConfigWithHistory'
+export type { ToastAction, ToastOptions } from './useToasts'
