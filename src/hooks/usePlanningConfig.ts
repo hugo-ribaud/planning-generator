@@ -78,29 +78,42 @@ export function usePlanningConfig(): UsePlanningConfigReturn {
   const [tasks, setTasks] = useState<Task[]>([])
   const [errors, setErrors] = useState<ConfigErrors>({})
 
-  // Config handlers
-  const updateConfig = useCallback((field: keyof PlanningConfigState, value: string | number): void => {
-    setConfig(prev => ({ ...prev, [field]: value }))
-    // Clear error for this field
-    setErrors(prev => ({ ...prev, [field]: null }))
-  }, [])
-
-  const validateConfig = useCallback((): boolean => {
+  // Real-time validation helper
+  const validateTimeFields = useCallback((updatedConfig: PlanningConfigState): ConfigErrors => {
     const newErrors: ConfigErrors = {}
 
-    if (config.workStart >= config.workEnd) {
+    if (updatedConfig.workStart >= updatedConfig.workEnd) {
       newErrors.workEnd = "L'heure de fin doit etre apres l'heure de debut"
     }
-    if (config.lunchStart >= config.lunchEnd) {
+    if (updatedConfig.lunchStart >= updatedConfig.lunchEnd) {
       newErrors.lunchEnd = "L'heure de fin de pause doit etre apres le debut"
     }
-    if (config.lunchStart < config.workStart || config.lunchEnd > config.workEnd) {
+    if (updatedConfig.lunchStart < updatedConfig.workStart || updatedConfig.lunchEnd > updatedConfig.workEnd) {
       newErrors.lunchStart = "La pause doit etre dans les heures de travail"
     }
 
+    return newErrors
+  }, [])
+
+  // Config handlers with real-time validation
+  const updateConfig = useCallback((field: keyof PlanningConfigState, value: string | number): void => {
+    setConfig(prev => {
+      const updated = { ...prev, [field]: value }
+      // Validate in real-time for time fields
+      const timeFields = ['workStart', 'workEnd', 'lunchStart', 'lunchEnd']
+      if (timeFields.includes(field)) {
+        const newErrors = validateTimeFields(updated)
+        setErrors(newErrors)
+      }
+      return updated
+    })
+  }, [validateTimeFields])
+
+  const validateConfig = useCallback((): boolean => {
+    const newErrors = validateTimeFields(config)
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }, [config])
+  }, [config, validateTimeFields])
 
   // Users handlers
   const addUser = useCallback((): void => {

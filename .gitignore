@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# playwright test artifacts
+.playwright-mcp/*
+.vercel
+
+# Serena project memories (local only)
+.serena/
