@@ -24,3 +24,5 @@ export type { UndoRedoControlsProps } from './UndoRedoControls'
 
 export { MobileNav, NavLink, HamburgerIcon, CloseIcon } from './MobileNav'
 export type { MobileNavProps, NavLinkProps } from './MobileNav'
+
+export { ErrorBoundary, ErrorFallback } from './ErrorBoundary'

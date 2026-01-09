@@ -6,6 +6,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
+import { ErrorBoundary } from './components/ui'
 import {
   LoginPage,
   RegisterPage,
@@ -18,7 +19,8 @@ function App(): JSX.Element {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
+        <ErrorBoundary>
+          <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -53,7 +55,8 @@ function App(): JSX.Element {
           {/* Default redirect */}
           <Route path="/" element={<Navigate to="/history" replace />} />
           <Route path="*" element={<Navigate to="/history" replace />} />
-        </Routes>
+          </Routes>
+        </ErrorBoundary>
       </AuthProvider>
     </BrowserRouter>
   )
