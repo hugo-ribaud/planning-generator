@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react'
 import { useEffect } from 'react'
-import type { ToastType, Toast as ToastData } from '../../hooks/useToasts'
+import type { ToastType, Toast as ToastData, ToastAction } from '../../hooks/useToasts'
 
 interface ToastTypeConfig {
   icon: string
@@ -34,13 +34,16 @@ export interface ToastProps {
   message: string
   type?: ToastType
   duration?: number
+  /** Action optionnelle (ex: bouton "Annuler") */
+  action?: ToastAction
   onClose: () => void
 }
 
 /**
  * Toast notification component
+ * Supporte un bouton d'action optionnel (ex: "Annuler")
  */
-export function Toast({ message, type = 'info', duration = 3000, onClose }: ToastProps): JSX.Element {
+export function Toast({ message, type = 'info', duration = 3000, action, onClose }: ToastProps): JSX.Element {
   useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(onClose, duration)
@@ -61,6 +64,17 @@ export function Toast({ message, type = 'info', duration = 3000, onClose }: Toas
     >
       <span aria-hidden="true">{config.icon}</span>
       <span className="flex-1 text-sm font-medium">{message}</span>
+
+      {/* Bouton d'action optionnel (ex: "Annuler") */}
+      {action && (
+        <button
+          onClick={action.onClick}
+          className="ml-2 px-2 py-1 text-xs font-semibold rounded bg-white/50 hover:bg-white/80 transition-colors focus:outline-none focus:ring-2 focus:ring-current focus:ring-offset-1"
+        >
+          {action.label}
+        </button>
+      )}
+
       <button
         onClick={onClose}
         aria-label="Fermer la notification"
@@ -93,6 +107,7 @@ export function ToastContainer({ toasts, onRemove }: ToastContainerProps): JSX.E
             message={toast.message}
             type={toast.type}
             duration={toast.duration}
+            action={toast.action}
             onClose={() => onRemove(toast.id)}
           />
         ))}
