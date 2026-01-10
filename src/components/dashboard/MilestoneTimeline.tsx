@@ -11,8 +11,17 @@ export interface MilestoneTimelineProps {
  * Timeline chronologique des milestones
  */
 export function MilestoneTimeline({ upcomingMilestones, overdueMilestones, users }: MilestoneTimelineProps): JSX.Element {
-  const formatDate = (dateString: string): string => {
+  /**
+   * Récupère la date cible d'un milestone (supporte les deux formats)
+   */
+  const getTargetDate = (milestone: Milestone): string | undefined => {
+    return milestone.targetDate || milestone.target_date
+  }
+
+  const formatDate = (dateString: string | undefined): string => {
+    if (!dateString) return ''
     const date = new Date(dateString)
+    if (isNaN(date.getTime())) return ''
     return date.toLocaleDateString('fr-FR', {
       weekday: 'short',
       day: 'numeric',
@@ -20,8 +29,11 @@ export function MilestoneTimeline({ upcomingMilestones, overdueMilestones, users
     })
   }
 
-  const getDaysText = (dateString: string): string => {
-    const days = Math.ceil((new Date(dateString).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+  const getDaysText = (dateString: string | undefined): string => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return ''
+    const days = Math.ceil((date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
     if (days === 0) return "Aujourd'hui"
     if (days === 1) return 'Demain'
     if (days < 0) return `Il y a ${Math.abs(days)} jour${Math.abs(days) > 1 ? 's' : ''}`
@@ -82,7 +94,7 @@ export function MilestoneTimeline({ upcomingMilestones, overdueMilestones, users
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-gray-900 truncate">{milestone.title}</p>
                             <div className="flex items-center gap-2 mt-1 text-xs">
-                              <span className="text-red-600">{getDaysText(milestone.targetDate!)}</span>
+                              <span className="text-red-600">{getDaysText(getTargetDate(milestone))}</span>
                               {user && (
                                 <>
                                   <span className="text-gray-300">•</span>
@@ -95,7 +107,7 @@ export function MilestoneTimeline({ upcomingMilestones, overdueMilestones, users
                               )}
                             </div>
                           </div>
-                          <span className="text-xs text-gray-500">{formatDate(milestone.targetDate!)}</span>
+                          <span className="text-xs text-gray-500">{formatDate(getTargetDate(milestone))}</span>
                         </div>
 
                         {/* Progress mini */}
@@ -130,8 +142,8 @@ export function MilestoneTimeline({ upcomingMilestones, overdueMilestones, users
               <div className="space-y-2 pl-6 border-l-2 border-primary/30">
                 {upcomingMilestones.map((milestone, index) => {
                   const user = getUserInfo(milestone.assignedTo)
-                  const isToday = getDaysText(milestone.targetDate!) === "Aujourd'hui"
-                  const isTomorrow = getDaysText(milestone.targetDate!) === 'Demain'
+                  const isToday = getDaysText(getTargetDate(milestone)) === "Aujourd'hui"
+                  const isTomorrow = getDaysText(getTargetDate(milestone)) === 'Demain'
 
                   return (
                     <motion.div
@@ -152,7 +164,7 @@ export function MilestoneTimeline({ upcomingMilestones, overdueMilestones, users
                             <p className="font-medium text-gray-900 truncate">{milestone.title}</p>
                             <div className="flex items-center gap-2 mt-1 text-xs">
                               <span className={isToday ? 'text-primary font-medium' : 'text-gray-500'}>
-                                {getDaysText(milestone.targetDate!)}
+                                {getDaysText(getTargetDate(milestone))}
                               </span>
                               {user && (
                                 <>
@@ -166,7 +178,7 @@ export function MilestoneTimeline({ upcomingMilestones, overdueMilestones, users
                               )}
                             </div>
                           </div>
-                          <span className="text-xs text-gray-500">{formatDate(milestone.targetDate!)}</span>
+                          <span className="text-xs text-gray-500">{formatDate(getTargetDate(milestone))}</span>
                         </div>
 
                         {/* Progress mini */}
