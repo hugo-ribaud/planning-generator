@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { useAuth } from '../contexts/AuthContext'
 import { usePlannings } from '../hooks/usePlannings'
-import { Button, Card, ConfirmDialog } from '../components/ui'
+import { Button, Card, ConfirmDialog, PlanoraiLogo } from '../components/ui'
 import type { Planning, PlanningConfig } from '../types'
 
 // Filter options
@@ -418,10 +418,9 @@ export function PlanningHistoryPage(): JSX.Element {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-primary">
-              Planorai
-            </h1>
+          <div className="flex items-center gap-4">
+            <PlanoraiLogo width={140} height={42} animated={false} />
+            <div className="h-8 w-px bg-gray-200" />
             <p className="text-sm text-gray-500">
               Bonjour, {displayName}
             </p>

@@ -10,7 +10,7 @@ import { GeneralConfigForm, UsersForm, TasksForm, AIPromptModal } from '../compo
 import { PlanningView } from '../components/planning'
 import { MilestoneList } from '../components/milestones'
 import { Dashboard } from '../components/dashboard'
-import { Button, SyncStatus, ToastContainer, MobileNav, NavLink } from '../components/ui'
+import { Button, SyncStatus, ToastContainer, MobileNav, NavLink, PlanoraiLogo } from '../components/ui'
 import { CreationModeSelector, AICreationFlow, ManualWizard } from '../components/creation'
 import { usePlanningConfig, usePlanningGenerator, useMilestones, useRealtimeSync, useToasts, useShoppingList, detectChangedFields, getFieldLabel, type TransformedPlanningData, type UsePlanningConfigReturn } from '../hooks'
 import { usePlannings } from '../hooks/usePlannings'
@@ -739,7 +739,7 @@ export function PlanningEditorPage(): JSX.Element {
               >
                 ← Retour
               </button>
-              <span className="text-primary font-bold text-lg">planorai</span>
+              <PlanoraiLogo width={120} height={36} animated={false} />
               <span className="text-gray-300">|</span>
               <input
                 type="text"
@@ -794,7 +794,7 @@ export function PlanningEditorPage(): JSX.Element {
           <>
             <div className="lg:hidden mb-4">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-primary font-bold">planorai</span>
+                <PlanoraiLogo width={100} height={30} animated={false} />
               </div>
               <input
                 type="text"

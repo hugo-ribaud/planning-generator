@@ -7,7 +7,7 @@ import { useState, type FormEvent, type ChangeEvent } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { useAuth } from '../contexts/AuthContext'
-import { Button, Input, Card } from '../components/ui'
+import { Button, Input, Card, PlanoraiLogo } from '../components/ui'
 
 interface LocationState {
   from?: {
@@ -61,9 +61,9 @@ export function LoginPage(): JSX.Element {
       >
         {/* Logo / Title */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">
-            Planorai
-          </h1>
+          <div className="flex justify-center mb-4">
+            <PlanoraiLogo width={180} height={54} />
+          </div>
           <p className="text-sm text-secondary">AI-powered family planning</p>
           <p className="text-gray-600">
             Connectez-vous pour acceder a vos plannings
