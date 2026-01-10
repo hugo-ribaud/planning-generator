@@ -242,15 +242,104 @@ export function transformGeneratedData(data: GeneratedPlanningData): {
  */
 export const EXAMPLE_PROMPTS = [
   {
-    title: 'Planning familial classique',
-    prompt: 'Planning hebdomadaire pour Hugo et Delphine. Hugo travaille 9h-17h, Delphine 8h-18h. Taches: courses (1x/semaine, urgent), menage (2x/semaine), cuisine (tous les jours le soir). Weekend off pour les deux.',
+    title: 'Couple avec chien',
+    prompt: `Planning hebdomadaire pour Hugo et Delphine, couple avec un chien.
+
+TÂCHES RÉGULIÈRES :
+- Ménage de la maison (2h, 2x/semaine, priorité haute)
+- Préparer les repas du soir (1h, tous les jours)
+- Promener le chien (30min, matin et soir, quotidien)
+- Faire une séance de sport (1h, 3x/semaine pour Hugo)
+
+COURSES À FAIRE :
+- Fruits : pommes, bananes, oranges, kiwis
+- Légumes : tomates, courgettes, carottes, salade
+- Viandes : poulet, steaks hachés
+- Produits laitiers : lait, yaourts, beurre, fromage râpé
+- Boulangerie : pain de mie, baguettes
+
+OBJECTIFS DU MOIS :
+- Perdre 3 kilos avant l'été (en cours)
+- Avoir une maison toujours rangée (pas encore commencé)
+
+Hugo travaille 9h-18h, Delphine 8h-17h. Weekend off.`,
+  },
+  {
+    title: 'Colocation étudiante',
+    prompt: `Organisation pour une coloc de 3 étudiants : Alex, Sam et Jordan.
+
+ACTIVITÉS À PLANIFIER :
+- Nettoyage des parties communes (1h30, 2x/semaine, en rotation)
+- Courses communes au supermarché (1h30, 1x/semaine, le samedi matin)
+- Sortir les poubelles (15min, 2x/semaine)
+- Révisions en groupe (2h, 3x/semaine le soir)
+
+LISTE DE COURSES PARTAGÉE :
+- Épicerie : pâtes, riz, huile d'olive, sauce tomate, céréales
+- Produits laitiers : lait, crème fraîche, œufs
+- Hygiène/maison : papier toilette, liquide vaisselle, éponges, lessive
+- Boissons : jus d'orange, café, thé
+- Surgelés : pizzas, légumes surgelés, glaces
+
+OBJECTIFS DE LA COLOC :
+- Maintenir la cuisine propre en permanence (en cours)
+- Économiser 100€/mois sur les courses (pas commencé)
+
+Emplois du temps flexibles, cours principalement le matin.`,
   },
   {
     title: 'Famille avec enfants',
-    prompt: 'Planning pour une famille de 4: Papa, Maman, et 2 enfants (ecole). Taches: devoirs avec les enfants, preparation repas, menage, lessive, activites extra-scolaires mercredi apres-midi.',
+    prompt: `Planning familial pour Marc, Sophie et leurs 2 enfants (Léo 8 ans, Emma 12 ans).
+
+TÂCHES QUOTIDIENNES :
+- Préparer le petit-déjeuner (30min, Marc)
+- Emmener les enfants à l'école (30min, Sophie)
+- Préparer le dîner (1h, en alternance)
+- Aide aux devoirs (1h, tous les soirs)
+
+TÂCHES HEBDOMADAIRES :
+- Courses alimentaires (2h, samedi matin)
+- Ménage complet (3h, samedi, toute la famille)
+- Lessive et repassage (2h, dimanche)
+- Activités extra-scolaires : foot Léo mercredi, danse Emma samedi
+
+COURSES FAMILLE :
+- Fruits : pommes, clémentines, bananes, compotes
+- Produits laitiers : lait, yaourts enfants, fromage
+- Boulangerie : pain, brioche, céréales
+- Surgelés : nuggets, frites, poissons panés
+
+OBJECTIFS :
+- Passer plus de temps en famille le weekend (en cours)
+- Les enfants font leur lit tous les matins (pas commencé)
+
+Marc travaille 8h30-18h, Sophie 9h-17h (télétravail mercredi). Mercredi après-midi off.`,
   },
   {
-    title: 'Colocation etudiante',
-    prompt: 'Colocation de 3 etudiants: Alex, Sam et Jordan. Courses communes 1x/semaine, menage des parties communes 2x/semaine, vaisselle quotidienne en rotation. Emploi du temps flexible.',
+    title: 'Freelance solo',
+    prompt: `Planning hebdomadaire pour Julie, freelance graphiste travaillant de la maison.
+
+ROUTINE DE TRAVAIL :
+- Bloc travail client (3h, matin, lundi à vendredi)
+- Prospection et admin (1h, après-midi, 3x/semaine)
+- Formation et veille (1h, vendredi après-midi)
+
+VIE QUOTIDIENNE :
+- Sport / yoga (1h, matin, 4x/semaine)
+- Courses et repas (1h, quotidien)
+- Ménage appartement (1h30, 2x/semaine)
+
+COURSES :
+- Fruits et légumes : avocats, épinards, tomates cerises, citrons
+- Épicerie : quinoa, lentilles, thé vert, amandes
+- Produits laitiers : lait d'avoine, yaourt grec
+- Boissons : eau gazeuse, café
+
+OBJECTIFS DU MOIS :
+- Décrocher 2 nouveaux clients (en cours)
+- Finir la refonte de mon portfolio (pas commencé)
+- Faire du sport régulièrement (en cours)
+
+Horaires flexibles, préfère travailler 9h-18h avec pause longue le midi.`,
   },
 ]
