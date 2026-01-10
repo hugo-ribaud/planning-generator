@@ -61,9 +61,10 @@ export function LoginPage(): JSX.Element {
       >
         {/* Logo / Title */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Planning Familial
+          <h1 className="text-3xl font-bold text-primary mb-2">
+            Planorai
           </h1>
+          <p className="text-sm text-secondary">AI-powered family planning</p>
           <p className="text-gray-600">
             Connectez-vous pour acceder a vos plannings
           </p>

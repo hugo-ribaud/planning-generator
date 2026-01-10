@@ -5,8 +5,8 @@ export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
 const variants: Record<ButtonVariant, string> = {
-  primary: 'bg-primary text-white hover:bg-primary/90 active:bg-primary/80',
-  secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 active:bg-gray-400',
+  primary: 'bg-primary text-white hover:bg-primary-hover active:bg-primary-hover/90',
+  secondary: 'bg-secondary text-white hover:bg-secondary-hover active:bg-secondary-hover/90',
   danger: 'bg-red-500 text-white hover:bg-red-600 active:bg-red-700',
   ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 active:bg-gray-200',
 }
@@ -55,7 +55,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         ${variants[variant]}
         ${sizes[size]}
         rounded-lg font-medium transition-colors
-        focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2
         disabled:opacity-50 disabled:cursor-not-allowed
         select-none touch-manipulation
         ${fullWidthMobile ? 'w-full sm:w-auto' : ''}

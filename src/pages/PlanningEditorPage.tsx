@@ -730,20 +730,22 @@ export function PlanningEditorPage(): JSX.Element {
 
       {/* Desktop Header - only show in editor mode */}
       {creationMode === 'editor' && (
-        <header className="hidden lg:block bg-white border-b border-gray-200 sticky top-0 z-10">
+        <header className="hidden lg:block bg-gradient-to-r from-primary/5 via-white to-secondary/5 border-b border-gray-200 sticky top-0 z-10">
           <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate('/history')}
-                className="text-gray-500 hover:text-gray-700 touch-target flex items-center justify-center"
+                className="text-gray-500 hover:text-primary touch-target flex items-center justify-center transition-colors"
               >
                 ← Retour
               </button>
+              <span className="text-primary font-bold text-lg">planorai</span>
+              <span className="text-gray-300">|</span>
               <input
                 type="text"
                 value={planningName}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => setPlanningName(e.target.value)}
-                className="text-xl font-bold text-gray-900 bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
+                className="text-xl font-bold text-gray-900 bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 rounded px-2 py-1"
                 placeholder="Nom du planning"
               />
             </div>
@@ -791,11 +793,14 @@ export function PlanningEditorPage(): JSX.Element {
         {creationMode === 'editor' && (
           <>
             <div className="lg:hidden mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-primary font-bold">planorai</span>
+              </div>
               <input
                 type="text"
                 value={planningName}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => setPlanningName(e.target.value)}
-                className="w-full text-lg font-bold text-gray-900 bg-white border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-lg font-bold text-gray-900 bg-white border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary"
                 placeholder="Nom du planning"
               />
             </div>

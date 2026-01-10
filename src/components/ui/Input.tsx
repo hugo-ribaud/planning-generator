@@ -56,7 +56,7 @@ export function Input({
           rounded-lg border transition-colors
           ${error
             ? 'border-red-500 focus:ring-red-500'
-            : 'border-gray-300 focus:border-primary focus:ring-primary'
+            : 'border-gray-300 focus:border-secondary focus:ring-secondary'
           }
           focus:outline-none focus:ring-2 focus:ring-offset-0
           disabled:bg-gray-100 disabled:cursor-not-allowed

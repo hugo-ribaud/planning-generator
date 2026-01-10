@@ -213,7 +213,7 @@ export function PrintablePlanning({ weeks, users, milestones, config, notes = []
           {/* Footer */}
           <footer className="mt-auto pt-6 border-t border-gray-200">
             <div className="flex items-center justify-between text-sm text-gray-400">
-              <span>Planning Familial &mdash; Semaine {currentWeek.weekNumber}</span>
+              <span>Planorai &mdash; Semaine {currentWeek.weekNumber}</span>
               <span>
                 Genere le {new Date().toLocaleDateString('fr-FR', {
                   day: 'numeric',

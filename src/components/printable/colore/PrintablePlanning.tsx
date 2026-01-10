@@ -129,7 +129,7 @@ export function PrintablePlanning({
   milestones = [],
   planning = null,
   config = {},
-  title = 'Planning Familial',
+  title = 'Planorai',
 }: PrintablePlanningProps): JSX.Element {
   const printRef = useRef<HTMLDivElement>(null)
 

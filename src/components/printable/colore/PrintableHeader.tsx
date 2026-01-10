@@ -113,7 +113,7 @@ export function PrintableHeader({
   config = {},
   startDate,
   endDate,
-  title = 'Planning Familial'
+  title = 'Planorai'
 }: PrintableHeaderProps): JSX.Element {
   const dateRange = useMemo(() => {
     if (startDate && endDate) {

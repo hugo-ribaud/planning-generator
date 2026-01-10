@@ -419,8 +419,8 @@ export function PlanningHistoryPage(): JSX.Element {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">
-              Planning Familial
+            <h1 className="text-xl font-bold text-primary">
+              Planorai
             </h1>
             <p className="text-sm text-gray-500">
               Bonjour, {displayName}

@@ -61,7 +61,7 @@ export interface MobileNavProps {
 }
 
 export function MobileNav({
-  title = 'Planning Familial',
+  title = 'Planorai',
   subtitle,
   children,
   headerActions,

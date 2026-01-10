@@ -32,7 +32,7 @@ export function Card({
     : 'p-4 sm:p-6'
 
   const cardClassName = `
-    bg-white rounded-xl shadow-sm border border-gray-200 ${paddingClass}
+    bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-primary ${paddingClass}
     ${className}
   `
 

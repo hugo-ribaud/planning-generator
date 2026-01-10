@@ -40,7 +40,7 @@ export function MagazineHeader({ weekNumber, startDate, endDate, year }: Magazin
       <div className="flex items-center gap-4 mb-6">
         <div className="h-1 w-16 bg-gray-900" />
         <span className="text-xs font-medium tracking-[0.3em] uppercase text-gray-500">
-          Planning Familial
+          Planorai
         </span>
         <div className="h-px flex-1 bg-gray-200" />
       </div>

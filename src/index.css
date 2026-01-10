@@ -1,9 +1,17 @@
 @import "tailwindcss";
 
-/* Custom theme */
+/* PLANORAI Theme */
 @theme {
-  --color-primary: #3B82F6;
-  --color-secondary: #EC4899;
+  /* Palette PLANORAI */
+  --color-primary: #FF6B4A;        /* Coral Warm */
+  --color-primary-hover: #E55A3A;
+  --color-secondary: #8B5CF6;      /* Violet Magic */
+  --color-secondary-hover: #7C4FE0;
+  --color-accent: #F59E0B;         /* Amber Energy */
+  --color-neutral: #78716C;        /* Warm Gray */
+  --color-background: #FFFBF5;     /* Off-White chaud */
+
+  /* Couleurs utilisateurs */
   --color-hugo: #3B82F6;
   --color-delphine: #EC4899;
   --color-common: #10B981;
@@ -11,7 +19,7 @@
 
 /* Base styles */
 body {
-  @apply bg-gray-50 text-gray-900 antialiased;
+  @apply bg-background text-gray-900 antialiased;
 }
 
 /* ================================
