@@ -32,15 +32,6 @@ export function GeneralConfigForm({ config, errors, onUpdate }: GeneralConfigFor
   return (
     <Card title="Configuration générale" icon="⚙️">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-        {/* Planning name */}
-        <Input
-          label="Nom du planning"
-          value={config.name}
-          onChange={handleChange('name')}
-          placeholder="Ex: Planning Janvier"
-          className="sm:col-span-2"
-        />
-
         {/* Period */}
         <Select
           label="Période"

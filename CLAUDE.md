@@ -103,6 +103,18 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
 - Hooks export via barrel files (`index.js`)
 - Animation imports from `motion/react` (not `framer-motion`)
 
+## State Management Notes
+
+### Planning Name
+
+The planning name is managed by a **single source of truth**: `planningName` state in `PlanningEditorPage.tsx`.
+
+- **Header input**: Editable field using `planningName`
+- **Save operation**: Uses `planningName` for the `name` field in Supabase
+- **GeneralConfigForm**: Does NOT include a name field (to avoid duplication)
+
+> ⚠️ Never add a name field to `GeneralConfigForm` - it would create state desynchronization issues with the header.
+
 ## AI Planning Generator
 
 ### Overview
