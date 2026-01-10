@@ -26,3 +26,6 @@ export { MobileNav, NavLink, HamburgerIcon, CloseIcon } from './MobileNav'
 export type { MobileNavProps, NavLinkProps } from './MobileNav'
 
 export { ErrorBoundary, ErrorFallback } from './ErrorBoundary'
+
+export { Stepper } from './Stepper'
+export type { StepperProps } from './Stepper'

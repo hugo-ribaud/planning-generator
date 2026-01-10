@@ -1,8 +1,12 @@
 export { GeneralConfigForm } from './GeneralConfigForm'
 export { UsersForm } from './UsersForm'
 export { TasksForm } from './TasksForm'
+export { MilestonesForm } from './MilestonesForm'
+export { ShoppingListEditor } from './ShoppingListEditor'
 export { AIPromptModal } from './AIPromptModal'
 export { AIPromptPreview } from './AIPromptPreview'
 
 export type { AIPromptModalProps } from './AIPromptModal'
 export type { AIPromptPreviewProps } from './AIPromptPreview'
+export type { MilestonesFormProps } from './MilestonesForm'
+export type { ShoppingListEditorProps } from './ShoppingListEditor'

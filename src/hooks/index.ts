@@ -9,6 +9,7 @@ export { usePlannings } from './usePlannings'
 export { useUndoRedo, useUndoRedoKeyboard } from './useUndoRedo'
 export { usePlanningConfigWithHistory } from './usePlanningConfigWithHistory'
 export { useAIGenerator } from './useAIGenerator'
+export { useWizard, PLANNING_WIZARD_STEPS } from './useWizard'
 
 // Re-export types
 export type { UsePlanningConfigReturn, PlanningConfigState, ConfigErrors } from './usePlanningConfig'
@@ -23,3 +24,4 @@ export type { UseUndoRedoOptions, UseUndoRedoReturn, UndoRedoAction, UndoRedoWra
 export type { UsePlanningConfigWithHistoryOptions, UsePlanningConfigWithHistoryReturn, PlanningSnapshot } from './usePlanningConfigWithHistory'
 export type { ToastAction, ToastOptions } from './useToasts'
 export type { UseAIGeneratorReturn, TransformedPlanningData } from './useAIGenerator'
+export type { UseWizardOptions, UseWizardReturn, WizardStep } from './useWizard'
