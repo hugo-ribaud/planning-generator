@@ -36,7 +36,7 @@ export function Input({
   return (
     <div className={`flex flex-col gap-1 sm:gap-1.5 ${className}`}>
       {label && (
-        <label htmlFor={id} className="text-xs sm:text-sm font-medium text-gray-700">
+        <label htmlFor={id} className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -54,12 +54,16 @@ export function Input({
         className={`
           ${inputSizes[inputSize]}
           rounded-lg border transition-colors
+          bg-white dark:bg-surface-dark
+          text-gray-900 dark:text-text-dark
+          placeholder:text-gray-400 dark:placeholder:text-gray-500
           ${error
             ? 'border-red-500 focus:ring-red-500'
-            : 'border-gray-300 focus:border-secondary focus:ring-secondary'
+            : 'border-gray-300 dark:border-border-dark focus:border-secondary focus:ring-secondary'
           }
           focus:outline-none focus:ring-2 focus:ring-offset-0
-          disabled:bg-gray-100 disabled:cursor-not-allowed
+          dark:focus:ring-offset-background-dark
+          disabled:bg-gray-100 dark:disabled:bg-surface-elevated-dark disabled:cursor-not-allowed
           touch-manipulation
         `}
         {...props}

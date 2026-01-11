@@ -10,6 +10,7 @@ export { useUndoRedo, useUndoRedoKeyboard } from './useUndoRedo'
 export { usePlanningConfigWithHistory } from './usePlanningConfigWithHistory'
 export { useAIGenerator } from './useAIGenerator'
 export { useWizard, PLANNING_WIZARD_STEPS } from './useWizard'
+export { useKeyboardShortcuts, formatShortcut, getModifierSymbol, SHORTCUTS_LIST } from './useKeyboardShortcuts'
 
 // Re-export types
 export type { UsePlanningConfigReturn, PlanningConfigState, ConfigErrors } from './usePlanningConfig'
@@ -25,3 +26,4 @@ export type { UsePlanningConfigWithHistoryOptions, UsePlanningConfigWithHistoryR
 export type { ToastAction, ToastOptions } from './useToasts'
 export type { UseAIGeneratorReturn, TransformedPlanningData } from './useAIGenerator'
 export type { UseWizardOptions, UseWizardReturn, WizardStep } from './useWizard'
+export type { KeyboardShortcut } from './useKeyboardShortcuts'

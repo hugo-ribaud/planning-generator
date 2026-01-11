@@ -32,12 +32,14 @@ export function Card({
     : 'p-4 sm:p-6'
 
   const cardClassName = `
-    bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-primary ${paddingClass}
+    bg-white dark:bg-surface-dark rounded-xl shadow-sm
+    border border-gray-200 dark:border-border-dark
+    border-l-4 border-l-primary ${paddingClass}
     ${className}
   `
 
   const titleElement = title && (
-    <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
+    <h2 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-text-dark mb-3 sm:mb-4 flex items-center gap-2">
       {icon && <span className="text-base sm:text-lg">{icon}</span>}
       {title}
     </h2>

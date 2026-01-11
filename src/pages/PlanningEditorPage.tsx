@@ -10,15 +10,16 @@ import { GeneralConfigForm, UsersForm, TasksForm, AIPromptModal } from '../compo
 import { PlanningView } from '../components/planning'
 import { MilestoneList } from '../components/milestones'
 import { Dashboard } from '../components/dashboard'
-import { Button, SyncStatus, ToastContainer, MobileNav, NavLink, PlanoraiLogo } from '../components/ui'
+import { Button, SyncStatus, ToastContainer, MobileNav, NavLink, PlanoraiLogo, ThemeToggle, KeyboardShortcutsModal, ExportDropdown } from '../components/ui'
 import { CreationModeSelector, AICreationFlow, ManualWizard } from '../components/creation'
-import { usePlanningConfig, usePlanningGenerator, useMilestones, useRealtimeSync, useToasts, useShoppingList, detectChangedFields, getFieldLabel, type TransformedPlanningData, type UsePlanningConfigReturn } from '../hooks'
+import { usePlanningConfig, usePlanningGenerator, useMilestones, useRealtimeSync, useToasts, useShoppingList, useKeyboardShortcuts, detectChangedFields, getFieldLabel, type TransformedPlanningData, type UsePlanningConfigReturn } from '../hooks'
 import { usePlannings } from '../hooks/usePlannings'
 import { useAuth } from '../contexts/AuthContext'
 import { TEST_USERS, TEST_TASKS, TEST_MILESTONES } from '../utils/testData'
 import { PrintablePlanning } from '../components/printable/magazine'
 import { ShoppingListView } from '../components/shopping'
 import type { PlanningConfig, User, Task, Milestone, PlanningWeek, ShoppingList } from '../types'
+import { exportToJSON } from '../utils/exportUtils'
 
 // Auto-save delay in ms (30 seconds)
 const AUTOSAVE_DELAY = 30000
@@ -131,6 +132,7 @@ export function PlanningEditorPage(): JSX.Element {
   const [showPlanning, setShowPlanning] = useState(false)
   const [showPrintable, setShowPrintable] = useState(false)
   const [showAIModal, setShowAIModal] = useState(false)
+  const [showShortcutsModal, setShowShortcutsModal] = useState(false)
   const [planningName, setPlanningName] = useState('Planning sans titre')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
@@ -147,6 +149,128 @@ export function PlanningEditorPage(): JSX.Element {
 
   // Track the last update timestamp to avoid re-applying our own changes
   const lastUpdateRef = useRef<string | null>(null)
+
+  // Section refs for keyboard navigation
+  const configSectionRef = useRef<HTMLDivElement>(null)
+  const usersSectionRef = useRef<HTMLDivElement>(null)
+  const tasksSectionRef = useRef<HTMLDivElement>(null)
+  const milestonesSectionRef = useRef<HTMLDivElement>(null)
+  const shoppingSectionRef = useRef<HTMLDivElement>(null)
+
+  // Scroll to section helper
+  const scrollToSection = useCallback((ref: React.RefObject<HTMLDivElement | null>) => {
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [])
+
+  // Keyboard shortcuts (only active in editor mode)
+  useKeyboardShortcuts(
+    [
+      // Save
+      {
+        key: 'mod+s',
+        handler: () => {
+          if (creationMode === 'editor') {
+            handleSave(false)
+            toast.success('Sauvegarde en cours...')
+          }
+        },
+        description: 'Sauvegarder',
+      },
+      // New task
+      {
+        key: 'mod+n',
+        handler: () => {
+          if (creationMode === 'editor') {
+            addTask()
+            setTimeout(() => scrollToSection(tasksSectionRef), 100)
+            toast.info('Nouvelle tache ajoutee')
+          }
+        },
+        description: 'Nouvelle tache',
+      },
+      // New user
+      {
+        key: 'mod+u',
+        handler: () => {
+          if (creationMode === 'editor') {
+            addUser()
+            setTimeout(() => scrollToSection(usersSectionRef), 100)
+            toast.info('Nouvel utilisateur ajoute')
+          }
+        },
+        description: 'Nouvel utilisateur',
+      },
+      // Generate planning
+      {
+        key: 'mod+g',
+        handler: () => {
+          if (creationMode === 'editor' && !showPlanning) {
+            handleGenerate()
+          }
+        },
+        description: 'Generer planning',
+      },
+      // Print
+      {
+        key: 'mod+p',
+        handler: () => {
+          if (creationMode === 'editor' && planning && planning.length > 0) {
+            setShowPrintable(true)
+          }
+        },
+        description: 'Imprimer',
+      },
+      // Close modals
+      {
+        key: 'escape',
+        handler: () => {
+          if (showShortcutsModal) setShowShortcutsModal(false)
+          else if (showAIModal) setShowAIModal(false)
+          else if (showPrintable) setShowPrintable(false)
+        },
+        description: 'Fermer',
+      },
+      // Section navigation (number keys)
+      {
+        key: '1',
+        handler: () => creationMode === 'editor' && scrollToSection(configSectionRef),
+        description: 'Configuration',
+        disableOnInput: true,
+      },
+      {
+        key: '2',
+        handler: () => creationMode === 'editor' && scrollToSection(usersSectionRef),
+        description: 'Utilisateurs',
+        disableOnInput: true,
+      },
+      {
+        key: '3',
+        handler: () => creationMode === 'editor' && scrollToSection(tasksSectionRef),
+        description: 'Taches',
+        disableOnInput: true,
+      },
+      {
+        key: '4',
+        handler: () => creationMode === 'editor' && scrollToSection(milestonesSectionRef),
+        description: 'Objectifs',
+        disableOnInput: true,
+      },
+      {
+        key: '5',
+        handler: () => creationMode === 'editor' && scrollToSection(shoppingSectionRef),
+        description: 'Courses',
+        disableOnInput: true,
+      },
+      // Help modal
+      {
+        key: 'shift+/',
+        handler: () => setShowShortcutsModal(true),
+        description: 'Aide raccourcis',
+        disableOnInput: true,
+      },
+    ],
+    { enabled: creationMode === 'editor' || showShortcutsModal || showAIModal || showPrintable }
+  )
 
   // Realtime sync handler - updates React state when remote changes arrive
   const handleRealtimeUpdate = useCallback((payload: RealtimePayload): void => {
@@ -508,55 +632,65 @@ export function PlanningEditorPage(): JSX.Element {
 
       {/* Forms */}
       <div className="space-y-6">
-        <GeneralConfigForm
-          config={config}
-          errors={errors}
-          onUpdate={updateConfig}
-        />
+        <div ref={configSectionRef}>
+          <GeneralConfigForm
+            config={config}
+            errors={errors}
+            onUpdate={updateConfig}
+          />
+        </div>
 
-        <UsersForm
-          users={users}
-          onUpdate={updateUser}
-          onAdd={addUser}
-          onRemove={removeUser}
-        />
+        <div ref={usersSectionRef}>
+          <UsersForm
+            users={users}
+            onUpdate={updateUser}
+            onAdd={addUser}
+            onRemove={removeUser}
+          />
+        </div>
 
-        <TasksForm
-          tasks={tasks}
-          users={users}
-          onUpdate={updateTask}
-          onAdd={addTask}
-          onRemove={removeTask}
-        />
+        <div ref={tasksSectionRef}>
+          <TasksForm
+            tasks={tasks}
+            users={users}
+            onUpdate={updateTask}
+            onAdd={addTask}
+            onRemove={removeTask}
+          />
+        </div>
 
-        <MilestoneList
-          milestones={milestones}
-          users={users}
-          onAdd={addMilestone}
-          onUpdate={updateMilestone}
-          onDelete={removeMilestone}
-          onToggleFocus={toggleFocus}
-        />
+        <div ref={milestonesSectionRef}>
+          <MilestoneList
+            milestones={milestones}
+            users={users}
+            onAdd={addMilestone}
+            onUpdate={updateMilestone}
+            onDelete={removeMilestone}
+            onToggleFocus={toggleFocus}
+          />
+        </div>
 
         {/* Shopping List */}
-        <ShoppingListView
-          shoppingList={shoppingList}
-          users={users}
-          actions={{
-            addCategory,
-            updateCategory,
-            removeCategory,
-            addItem,
-            updateItem,
-            removeItem,
-            toggleItem,
-            assignItem,
-            clearCheckedItems,
-            uncheckAllItems,
-            resetToDefault: resetShoppingList,
-            getStats: getShoppingStats,
-          }}
-        />
+        <div ref={shoppingSectionRef}>
+          <ShoppingListView
+            shoppingList={shoppingList}
+            users={users}
+            actions={{
+              addCategory,
+              updateCategory,
+              removeCategory,
+              addItem,
+              updateItem,
+              removeItem,
+              toggleItem,
+              assignItem,
+              clearCheckedItems,
+              uncheckAllItems,
+              resetToDefault: resetShoppingList,
+              getStats: getShoppingStats,
+            }}
+          />
+        </div>
 
         {/* Error message */}
         <AnimatePresence>
@@ -668,6 +802,12 @@ export function PlanningEditorPage(): JSX.Element {
         onClose={() => setShowAIModal(false)}
         onApply={handleApplyAIData}
       />
+
+      {/* Keyboard Shortcuts Help Modal */}
+      <KeyboardShortcutsModal
+        isOpen={showShortcutsModal}
+        onClose={() => setShowShortcutsModal(false)}
+      />
     </>
   )
 
@@ -707,6 +847,22 @@ export function PlanningEditorPage(): JSX.Element {
               label="Sauvegarder"
               onClick={() => handleSave(false)}
             />
+            <NavLink
+              icon="📤"
+              label="Exporter JSON"
+              onClick={() => {
+                exportToJSON({
+                  name: planningName,
+                  config,
+                  users,
+                  tasks,
+                  milestones,
+                  shoppingList,
+                  planningResult: planning,
+                })
+                toast.success('Export JSON reussi')
+              }}
+            />
             {(tasks.length > 0 || milestones.length > 0) && (
               <NavLink
                 icon="🖨"
@@ -714,6 +870,11 @@ export function PlanningEditorPage(): JSX.Element {
                 onClick={() => setShowPrintable(true)}
               />
             )}
+            <NavLink
+              icon="⌨️"
+              label="Raccourcis clavier"
+              onClick={() => setShowShortcutsModal(true)}
+            />
             <div className="border-t border-gray-200 my-4" />
             <div className="px-4 py-2">
               <p className="text-sm text-gray-500">Connecte en tant que</p>
@@ -730,22 +891,22 @@ export function PlanningEditorPage(): JSX.Element {
 
       {/* Desktop Header - only show in editor mode */}
       {creationMode === 'editor' && (
-        <header className="hidden lg:block bg-gradient-to-r from-primary/5 via-white to-secondary/5 border-b border-gray-200 sticky top-0 z-10">
+        <header className="hidden lg:block bg-gradient-to-r from-primary/5 via-white to-secondary/5 dark:from-primary/10 dark:via-surface-dark dark:to-secondary/10 border-b border-gray-200 dark:border-border-dark sticky top-0 z-10">
           <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate('/history')}
-                className="text-gray-500 hover:text-primary touch-target flex items-center justify-center transition-colors"
+                className="text-gray-500 dark:text-text-muted-dark hover:text-primary touch-target flex items-center justify-center transition-colors"
               >
                 ← Retour
               </button>
               <PlanoraiLogo width={120} height={36} animated={false} />
-              <span className="text-gray-300">|</span>
+              <span className="text-gray-300 dark:text-border-dark">|</span>
               <input
                 type="text"
                 value={planningName}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => setPlanningName(e.target.value)}
-                className="text-xl font-bold text-gray-900 bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 rounded px-2 py-1"
+                className="text-xl font-bold text-gray-900 dark:text-text-dark bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 dark:focus:ring-offset-background-dark rounded px-2 py-1"
                 placeholder="Nom du planning"
               />
             </div>
@@ -775,7 +936,35 @@ export function PlanningEditorPage(): JSX.Element {
                 Sauvegarder
               </Button>
 
-              <div className="text-sm text-gray-500">
+              {/* Export dropdown */}
+              <ExportDropdown
+                options={{
+                  name: planningName,
+                  config,
+                  users,
+                  tasks,
+                  milestones,
+                  shoppingList,
+                  planningResult: planning,
+                }}
+                onExportComplete={(format) => toast.success(`Export ${format} reussi`)}
+              />
+
+              <ThemeToggle />
+
+              {/* Keyboard shortcuts help */}
+              <button
+                onClick={() => setShowShortcutsModal(true)}
+                className="p-2 text-gray-500 dark:text-text-muted-dark hover:text-gray-700 dark:hover:text-text-dark hover:bg-gray-100 dark:hover:bg-surface-elevated-dark rounded-lg transition-colors"
+                aria-label="Raccourcis clavier"
+                title="Raccourcis clavier (?)"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </button>
+
+              <div className="text-sm text-gray-500 dark:text-text-muted-dark">
                 {displayName}
               </div>
 

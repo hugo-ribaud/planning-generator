@@ -1,7 +1,18 @@
-# Planning Familial - Project Overview
+# PLANORAI - Project Overview
+
+## Branding
+| Element | Value |
+|---------|-------|
+| **Name** | PLANORAI |
+| **Tagline** | *AI-powered family planning* |
+| **Etymology** | Plan + Aura + AI |
+| **Primary** | Coral `#FF6B4A` |
+| **Secondary** | Violet `#8B5CF6` |
+| **Accent** | Amber `#F59E0B` |
+| **Production** | https://planning-generator-steel.vercel.app |
 
 ## Purpose
-Family planning generator web app with intelligent task distribution algorithms. French-language UI for shared household task management.
+AI-powered family planning generator with intelligent task distribution. French-language UI for shared household task management.
 
 ## Current Status
 - **TypeScript Migration**: ✅ Complete (75 .ts/.tsx files)
@@ -10,6 +21,8 @@ Family planning generator web app with intelligent task distribution algorithms.
   - 107 files changed, 3,777 additions, 1,469 deletions
 - **E2E Testing**: ✅ Validated 2026-01-08 (13/13 tests pass)
 - **Production Ready**: Yes
+- **Visual Identity**: ✅ Complete (logo, favicon, OG image)
+- **Linear Issue**: DEV-128 (Done)
 
 ## Tech Stack
 - **Frontend**: React 19 + Vite 7
@@ -30,6 +43,12 @@ Family planning generator web app with intelligent task distribution algorithms.
 - **Task types**: `solo`, `common`, `flexible`
 - **Time preferences**: morning/afternoon/evening/any
 - **Priority**: urgent(1) → haute(2) → normale(3) → basse(4)
+
+## Visual Assets
+- **Logo**: `src/components/ui/Logo.tsx` (PlanoraiLogo, PlanoraiIcon)
+- **Favicon**: `public/favicon.svg` (calendar + sparkle)
+- **OG Image**: `public/og-image.svg` (1200x630)
+- **Animation**: Pulsing aura effect on logo
 
 ## Routes
 - `/login`, `/register` - Auth

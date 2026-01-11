@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
+/* Dark mode variant - class-based for manual toggle */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* PLANORAI Theme */
 @theme {
-  /* Palette PLANORAI */
+  /* Palette PLANORAI - Light Mode */
   --color-primary: #FF6B4A;        /* Coral Warm */
   --color-primary-hover: #E55A3A;
   --color-secondary: #8B5CF6;      /* Violet Magic */
@@ -11,15 +14,37 @@
   --color-neutral: #78716C;        /* Warm Gray */
   --color-background: #FFFBF5;     /* Off-White chaud */
 
+  /* Dark Mode Colors */
+  --color-background-dark: #0f0f0f;
+  --color-surface-dark: #1a1a1a;
+  --color-surface-elevated-dark: #262626;
+  --color-border-dark: #333333;
+  --color-text-dark: #f3f4f6;
+  --color-text-muted-dark: #9ca3af;
+
   /* Couleurs utilisateurs */
   --color-hugo: #3B82F6;
   --color-delphine: #EC4899;
   --color-common: #10B981;
 }
 
-/* Base styles */
+/* Base styles - Light mode */
 body {
   @apply bg-background text-gray-900 antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark mode body */
+.dark body,
+body.dark {
+  background-color: var(--color-background-dark);
+  color: var(--color-text-dark);
+}
+
+/* Dark mode html for full coverage */
+html.dark {
+  background-color: var(--color-background-dark);
+  color-scheme: dark;
 }
 
 /* ================================

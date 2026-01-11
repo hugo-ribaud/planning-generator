@@ -31,3 +31,11 @@ export { Stepper } from './Stepper'
 export type { StepperProps } from './Stepper'
 
 export { PlanoraiLogo, PlanoraiIcon } from './Logo'
+
+export { ThemeToggle } from './ThemeToggle'
+export type { ThemeToggleProps } from './ThemeToggle'
+
+export { KeyboardShortcutsModal } from './KeyboardShortcutsModal'
+
+export { ExportDropdown } from './ExportDropdown'
+export type { ExportDropdownProps } from './ExportDropdown'
