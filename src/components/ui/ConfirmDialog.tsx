@@ -28,20 +28,20 @@ const variantStyles: Record<ConfirmDialogVariant, {
 }> = {
   danger: {
     icon: '&#9888;',
-    iconBg: 'bg-red-100',
-    iconColor: 'text-red-600',
+    iconBg: 'bg-red-100 dark:bg-red-900/30',
+    iconColor: 'text-red-600 dark:text-red-400',
     confirmButtonClass: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
   },
   warning: {
     icon: '&#9888;',
-    iconBg: 'bg-amber-100',
-    iconColor: 'text-amber-600',
+    iconBg: 'bg-amber-100 dark:bg-amber-900/30',
+    iconColor: 'text-amber-600 dark:text-amber-400',
     confirmButtonClass: 'bg-amber-600 hover:bg-amber-700 focus:ring-amber-500',
   },
   info: {
     icon: '&#8505;',
-    iconBg: 'bg-blue-100',
-    iconColor: 'text-blue-600',
+    iconBg: 'bg-blue-100 dark:bg-blue-900/30',
+    iconColor: 'text-blue-600 dark:text-blue-400',
     confirmButtonClass: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
   },
 }
@@ -145,7 +145,7 @@ export function ConfirmDialog({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="relative bg-white rounded-xl shadow-xl max-w-md w-full mx-4 overflow-hidden"
+            className="relative bg-white dark:bg-surface-dark rounded-xl shadow-xl max-w-md w-full mx-4 overflow-hidden"
           >
             <div className="p-6">
               {/* Icon and Title */}
@@ -158,13 +158,13 @@ export function ConfirmDialog({
                 <div className="flex-1 min-w-0">
                   <h2
                     id="confirm-dialog-title"
-                    className="text-lg font-semibold text-gray-900"
+                    className="text-lg font-semibold text-gray-900 dark:text-text-dark"
                   >
                     {title}
                   </h2>
                   <p
                     id="confirm-dialog-message"
-                    className="mt-2 text-sm text-gray-600"
+                    className="mt-2 text-sm text-gray-600 dark:text-text-muted-dark"
                   >
                     {message}
                   </p>
@@ -187,6 +187,7 @@ export function ConfirmDialog({
                   className={`
                     px-4 py-2 rounded-lg font-medium text-white
                     transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2
+                    dark:focus:ring-offset-background-dark
                     ${styles.confirmButtonClass}
                   `}
                 >

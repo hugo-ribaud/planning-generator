@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { useAuth } from '../contexts/AuthContext'
 import { usePlannings } from '../hooks/usePlannings'
-import { Button, Card, ConfirmDialog, PlanoraiLogo } from '../components/ui'
+import { Button, Card, ConfirmDialog, PlanoraiLogo, ThemeToggle } from '../components/ui'
 import type { Planning, PlanningConfig } from '../types'
 
 // Filter options
@@ -96,10 +96,10 @@ function PlanningCard({ planning, onLoad, onDuplicate, onArchive, onDelete, onSh
           {/* Header */}
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900 truncate">
+              <h3 className="font-semibold text-gray-900 dark:text-text-dark truncate">
                 {planning.name}
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-text-muted-dark">
                 {formatRelativeDate(planning.updated_at)}
               </p>
             </div>
@@ -120,7 +120,7 @@ function PlanningCard({ planning, onLoad, onDuplicate, onArchive, onDelete, onSh
           </div>
 
           {/* Stats */}
-          <div className="flex gap-4 text-sm text-gray-600 mb-3">
+          <div className="flex gap-4 text-sm text-gray-600 dark:text-text-muted-dark mb-3">
             <span>{usersCount} utilisateur{usersCount > 1 ? 's' : ''}</span>
             <span>{tasksCount} tache{tasksCount > 1 ? 's' : ''}</span>
             {hasResult && (
@@ -130,7 +130,7 @@ function PlanningCard({ planning, onLoad, onDuplicate, onArchive, onDelete, onSh
 
           {/* Config summary */}
           {planning.config && (
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-gray-500 dark:text-text-muted-dark">
               {planning.config.startDate && (
                 <span>
                   Du {new Date(planning.config.startDate).toLocaleDateString('fr-FR')}
@@ -147,7 +147,7 @@ function PlanningCard({ planning, onLoad, onDuplicate, onArchive, onDelete, onSh
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-white/95 rounded-xl flex items-center justify-center gap-2 p-4"
+                className="absolute inset-0 bg-white/95 dark:bg-surface-dark/95 rounded-xl flex items-center justify-center gap-2 p-4"
                 onClick={(e: MouseEvent) => e.stopPropagation()}
               >
                 <Button
@@ -227,10 +227,10 @@ function EmptyState({ filter, onCreateNew }: EmptyStateProps): JSX.Element {
       className="text-center py-12"
     >
       <div className="text-6xl mb-4">&#128197;</div>
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-text-dark mb-2">
         {messages[filter]}
       </h3>
-      <p className="text-gray-600 mb-6">
+      <p className="text-gray-600 dark:text-text-muted-dark mb-6">
         Creez votre premier planning familial en quelques clics
       </p>
       <Button variant="primary" onClick={onCreateNew}>
@@ -272,16 +272,16 @@ function ShareModal({ planning, shareUrl, onClose, onCopyLink, onUnshare }: Shar
         initial={{ scale: 0.95 }}
         animate={{ scale: 1 }}
         exit={{ scale: 0.95 }}
-        className="bg-white rounded-xl shadow-xl max-w-md w-full p-6"
+        className="bg-white dark:bg-surface-dark rounded-xl shadow-xl max-w-md w-full p-6"
         onClick={(e: MouseEvent) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-text-dark mb-4">
           Partager "{planning.name}"
         </h2>
 
         {shareUrl ? (
           <>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-600 dark:text-text-muted-dark mb-4">
               Partagez ce lien pour permettre a d'autres de consulter votre planning (lecture seule).
             </p>
             <div className="flex gap-2 mb-4">
@@ -289,7 +289,7 @@ function ShareModal({ planning, shareUrl, onClose, onCopyLink, onUnshare }: Shar
                 type="text"
                 readOnly
                 value={shareUrl}
-                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm"
+                className="flex-1 px-3 py-2 border border-gray-200 dark:border-border-dark rounded-lg bg-gray-50 dark:bg-surface-elevated-dark text-sm text-gray-900 dark:text-text-dark"
               />
               <Button variant="primary" onClick={handleCopy}>
                 {copied ? 'Copie !' : 'Copier'}
@@ -304,12 +304,12 @@ function ShareModal({ planning, shareUrl, onClose, onCopyLink, onUnshare }: Shar
             </Button>
           </>
         ) : (
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-text-muted-dark">
             Chargement du lien de partage...
           </p>
         )}
 
-        <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-border-dark">
           <Button variant="secondary" className="w-full" onClick={onClose}>
             Fermer
           </Button>
@@ -414,19 +414,20 @@ export function PlanningHistoryPage(): JSX.Element {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-background-dark dark:to-surface-dark">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <header className="bg-white dark:bg-surface-dark border-b border-gray-200 dark:border-border-dark sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <PlanoraiLogo width={140} height={42} animated={false} />
-            <div className="h-8 w-px bg-gray-200" />
-            <p className="text-sm text-gray-500">
+            <div className="h-8 w-px bg-gray-200 dark:bg-border-dark" />
+            <p className="text-sm text-gray-500 dark:text-text-muted-dark">
               Bonjour, {displayName}
             </p>
           </div>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Button variant="primary" onClick={handleCreateNew}>
               + Nouveau planning
             </Button>
@@ -448,8 +449,8 @@ export function PlanningHistoryPage(): JSX.Element {
               className={`
                 px-4 py-2 rounded-lg font-medium transition-colors
                 ${filter === key
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
+                  ? 'bg-primary text-white'
+                  : 'bg-white dark:bg-surface-dark text-gray-600 dark:text-text-muted-dark hover:bg-gray-50 dark:hover:bg-surface-elevated-dark'
                 }
               `}
             >

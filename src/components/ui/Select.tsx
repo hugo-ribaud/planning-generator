@@ -43,7 +43,7 @@ export function Select({
   return (
     <div className={`flex flex-col gap-1 sm:gap-1.5 ${className}`}>
       {label && (
-        <label htmlFor={id} className="text-xs sm:text-sm font-medium text-gray-700">
+        <label htmlFor={id} className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -59,13 +59,15 @@ export function Select({
         className={`
           ${selectSizes[selectSize]}
           rounded-lg border transition-colors appearance-none
-          bg-white bg-no-repeat bg-right
+          bg-white dark:bg-surface-dark bg-no-repeat bg-right
+          text-gray-900 dark:text-text-dark
           ${error
             ? 'border-red-500 focus:ring-red-500'
-            : 'border-gray-300 focus:border-primary focus:ring-primary'
+            : 'border-gray-300 dark:border-border-dark focus:border-primary focus:ring-primary'
           }
           focus:outline-none focus:ring-2 focus:ring-offset-0
-          disabled:bg-gray-100 disabled:cursor-not-allowed
+          dark:focus:ring-offset-background-dark
+          disabled:bg-gray-100 dark:disabled:bg-surface-elevated-dark disabled:cursor-not-allowed
           touch-manipulation
         `}
         style={{

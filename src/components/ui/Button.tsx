@@ -8,7 +8,7 @@ const variants: Record<ButtonVariant, string> = {
   primary: 'bg-primary text-white hover:bg-primary-hover active:bg-primary-hover/90',
   secondary: 'bg-secondary text-white hover:bg-secondary-hover active:bg-secondary-hover/90',
   danger: 'bg-red-500 text-white hover:bg-red-600 active:bg-red-700',
-  ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 active:bg-gray-200',
+  ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 active:bg-gray-200 dark:text-gray-300 dark:hover:bg-surface-elevated-dark dark:active:bg-border-dark',
 }
 
 // Touch-friendly sizes with minimum 44px touch target on mobile
@@ -56,6 +56,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         ${sizes[size]}
         rounded-lg font-medium transition-colors
         focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2
+        dark:focus:ring-offset-background-dark
         disabled:opacity-50 disabled:cursor-not-allowed
         select-none touch-manipulation
         ${fullWidthMobile ? 'w-full sm:w-auto' : ''}

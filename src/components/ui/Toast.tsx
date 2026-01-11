@@ -10,23 +10,23 @@ interface ToastTypeConfig {
 const typeConfig: Record<ToastType, ToastTypeConfig> = {
   info: {
     icon: 'ℹ️',
-    className: 'bg-blue-50 text-blue-800 border-blue-200',
+    className: 'bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800',
   },
   success: {
     icon: '✅',
-    className: 'bg-green-50 text-green-800 border-green-200',
+    className: 'bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-green-200 dark:border-green-800',
   },
   warning: {
     icon: '⚠️',
-    className: 'bg-yellow-50 text-yellow-800 border-yellow-200',
+    className: 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800',
   },
   error: {
     icon: '❌',
-    className: 'bg-red-50 text-red-800 border-red-200',
+    className: 'bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-red-200 dark:border-red-800',
   },
   sync: {
     icon: '🔄',
-    className: 'bg-primary/10 text-primary border-primary/20',
+    className: 'bg-primary/10 text-primary dark:text-primary/90 border-primary/20',
   },
 }
 
@@ -69,7 +69,7 @@ export function Toast({ message, type = 'info', duration = 3000, action, onClose
       {action && (
         <button
           onClick={action.onClick}
-          className="ml-2 px-2 py-1 text-xs font-semibold rounded bg-white/50 hover:bg-white/80 transition-colors focus:outline-none focus:ring-2 focus:ring-current focus:ring-offset-1"
+          className="ml-2 px-2 py-1 text-xs font-semibold rounded bg-white/50 dark:bg-white/20 hover:bg-white/80 dark:hover:bg-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-current focus:ring-offset-1"
         >
           {action.label}
         </button>

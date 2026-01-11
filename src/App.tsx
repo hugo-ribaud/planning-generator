@@ -5,6 +5,7 @@
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { ErrorBoundary } from './components/ui'
 import {
@@ -17,9 +18,10 @@ import {
 
 function App(): JSX.Element {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <ErrorBoundary>
+    <ThemeProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <ErrorBoundary>
           <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
@@ -56,9 +58,10 @@ function App(): JSX.Element {
           <Route path="/" element={<Navigate to="/history" replace />} />
           <Route path="*" element={<Navigate to="/history" replace />} />
           </Routes>
-        </ErrorBoundary>
-      </AuthProvider>
-    </BrowserRouter>
+          </ErrorBoundary>
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   )
 }
 
